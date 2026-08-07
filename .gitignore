@@ -1,0 +1,11 @@
+# Local environment variables
+.env
+
+# Compiled class files
+bin/
+*.class
+
+# IDE configurations
+.vscode/
+.idea/
+*.iml
