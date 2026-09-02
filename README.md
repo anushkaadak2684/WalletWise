@@ -1,96 +1,159 @@
-# 💳 WalletWise - Digital Wallet & Personal Finance Tracker
+# 💳 WalletWise — Object-Oriented Finance & Digital Wallet Tracker
 
-A robust, enterprise-grade Desktop Application built in **Java (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt security, atomic transactional data integrity, and gamified reward tracking.
+**WalletWise** is an enterprise-grade personal finance and digital wallet system crafted to demonstrate advanced **Object-Oriented Programming (OOP)**, **SOLID Design Principles**, and **Software Design Patterns** in Java.
 
----
-
-## 🌟 Key Features
-
-### 🏦 Wallet Management
-* **Wallet Types**: Supports **Personal Wallet** (monthly aggregate spending limit) and **Business Wallet** (per-transaction spending cap).
-* **Live Balance & Metrics**: Dynamic visual utilization bars, real-time balance updates, and status indicators.
-* **Strategy Pattern Spending Limits**: Dynamic polymorphic evaluation of spending thresholds without conditional switching.
-
-### 💳 Transactions (Deposits & Withdrawals)
-* Record deposits (income) and withdrawals (expenses/transfers) with custom descriptions.
-* Real-time activity history and automated system notification logging.
-* **Atomic JDBC Transactions**: Balance updates and ledger entries commit atomically with automatic rollback on error.
-
-### 💸 Expense Tracking & Category Analytics
-* **Expense Classification**: Differentiates between **Fixed Expenses** (recurring bills, rent) and **Variable Expenses** (groceries, entertainment).
-* **Category Breakdown**: Categorize expenses across `FOOD`, `RENT`, `UTILITIES`, `ENTERTAINMENT`, `SHOPPING`, `HEALTHCARE`, and `OTHER`.
-* **Visual Pie Chart**: Custom Swing component rendering interactive expense category distribution in `WalletPanel`.
-
-### 📈 Category Budgeting
-* Define category spending limits with start and end dates.
-* Real-time progress monitoring comparing limit vs actual spent (`ON TRACK` vs `EXCEEDED`).
-
-### 🎯 Savings Goals & Gamified Rewards
-* Establish target savings goals with target dates.
-* **Atomic Goal Contributions**: Deposit funds directly into savings goals from active wallet balance with full rollback protection.
-* **Gamification**: Earn **+100 Reward Points** and system achievement notifications automatically upon completing a savings goal via the Observer Pattern.
-
-### 📊 Comprehensive Financial Reports
-* Generate periodical reports (**Monthly**, **Yearly**, **Custom**).
-* **Itemized Side-Pane Viewer**: Synchronized dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
+While featuring a fully functional Swing GUI (FlatLaf) and MySQL persistence, the core focus of this project is **clean domain modeling, modular architecture, and extensible object-oriented design**.
 
 ---
 
-## 🔒 Security Architecture
+## 🎯 Core Engineering Objectives
 
-* **BCrypt Password Hashing**: Passwords are never stored or compared in plaintext. All user credentials are protected using salted BCrypt hashes (cost factor 12) via `at.favre.lib:bcrypt:0.10.2`.
-* **Zero-Downtime Migration**: The authentication service seamlessly detects legacy plaintext passwords upon login, authenticates them, and transparently upgrades them to BCrypt hashes in the database.
-* **Input Sanitization & Secure Comparison**: Defense against injection and brute-force vulnerabilities.
+* **Mastery of OOP Pillars**: Practical application of Encapsulation, Inheritance, Polymorphism, Abstraction, and Composition.
+* **Adherence to SOLID Principles**: Decoupled, maintainable, and testable design.
+* **Practical Design Patterns**: Applied Strategy, Observer, and Factory patterns to solve real domain problems without over-engineering.
+* **Separation of Concerns**: Strict layered architecture separating Presentation, Business Logic, and Data Persistence.
 
 ---
 
-## 🏛️ Architecture & Design Patterns
+## 🧩 1. Deep Dive: Object-Oriented Programming (OOP) Concepts
 
-The system enforces a strict 4-tier Layered Architecture:
+### 🔒 A. Encapsulation & Domain Integrity
+* **Private State Scoping**: All class attributes across domain models (`User`, `Wallet`, `Expense`, `Budget`, `SavingsGoal`) are declared `private` to prevent unauthorized external state mutation.
+* **Invariant Enforcement**: Setters and business methods enforce strict business validations (e.g., preventing negative deposits/withdrawals, validating date ranges, ensuring positive spending limits).
+* **Defensive Copying**: Collections within domain objects (e.g., `wallet.getTransactions()`, `wallet.getExpenses()`) return defensive copies (`new ArrayList<>(transactions)`) to preserve encapsulation.
 
-```
-GUI / Presentation (Swing / FlatLaf)
-        │
-        ▼
-Service Layer (Business Logic & Atomic JDBC Transactions)
-        │
-        ▼
-Repository Layer (CRUD Interface & Implementation)
-        │
-        ▼
-Database (MySQL 8.0+ / H2 In-Memory for Tests)
+```java
+public void deposit(BigDecimal amount) {
+    if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+        throw new IllegalArgumentException("Deposit amount must be greater than zero");
+    }
+    this.balance = this.balance.add(amount);
+}
 ```
 
-### 🎨 Design Patterns in Detail
+---
 
-1. **Strategy Pattern (`strategy`)**:
-   * `SpendingLimitStrategy` defines the spending limit contract.
-   * `PersonalLimitStrategy`: Evaluates aggregate monthly limits for personal wallets.
-   * `BusinessLimitStrategy`: Evaluates per-transaction caps for business wallets.
-   * `Wallet` holds a reference to `SpendingLimitStrategy`, eliminating `instanceof` branches in the presentation and service layers.
+### 🏛️ B. Inheritance & Class Hierarchies
+* **Abstract Base Classes**: `Wallet` and `Expense` provide shared attributes (id, balance, date, amount) and template behavior, while leaving specialized logic to concrete subclasses.
+* **Specialized Subclasses**:
+  * `PersonalWallet` & `BusinessWallet` extend `Wallet`, introducing monthly aggregate limits vs. per-transaction limits.
+  * `FixedExpense` & `VariableExpense` extend `Expense`, introducing recurring frequencies (`MONTHLY`, `WEEKLY`) vs. expected maximum amounts.
 
-2. **Observer Pattern (`observer`)**:
-   * `WalletEventListener` defines callbacks for domain events: `onTransactionCreated` and `onSavingsGoalAchieved`.
-   * `NotificationObserver`: Synchronously creates persistent system notifications for transaction alerts and savings milestones.
-   * `RewardObserver`: Automatically awards bonus points upon achieving savings goals.
-   * Eliminates duplicated notification/reward code from UI event handlers.
-
-3. **Simple / Static Factory (`factory`)**:
-   * `WalletFactory` and `ExpenseFactory` centralize polymorphic object instantiation for wallet and expense types.
-
-4. **Repository Pattern (`repository.interfaces` & `repository`)**:
-   * Data access abstraction providing connection-aware overloads (`save(Connection, ...)`, `update(Connection, ...)`) enabling atomic multi-table transactions across service boundaries.
+```
+            ┌─────────────────┐
+            │  Wallet (Abstr) │
+            └────────┬────────┘
+                     │
+         ┌───────────┴───────────┐
+         │                       │
+┌────────────────┐      ┌─────────────────┐
+│ PersonalWallet │      │ BusinessWallet  │
+└────────────────┘      └─────────────────┘
+```
 
 ---
 
-## 🛠️ Technology Stack
+### 🎭 C. Polymorphism & Dynamic Dispatch
+* **Dynamic Method Dispatch**: Base references (`Wallet wallet`, `Expense expense`) uniformly invoke polymorphic methods like `calculateTransactionLimit()` and `displayDetails()` without requiring runtime type casting.
+* **Elimination of Type Switching**: Instead of using brittle `if (wallet instanceof PersonalWallet)` condition blocks throughout services and UI panels, behavior is resolved polymorphically through class hierarchies and Strategy objects.
 
-* **Language**: Java 17
-* **Build System**: Apache Maven
-* **GUI Framework**: Java Swing with FlatLaf (FlatDarkLaf 3.5.2)
-* **Database**: MySQL 8.0+ (Production) & H2 Database (Integration Testing)
-* **Security**: Favre BCrypt 0.10.2
-* **Testing**: JUnit 5 (Jupiter 5.10.2) + Mockito 5.11.0
+---
+
+### 🧱 D. Abstraction & Interface Segregation
+* **Interface-Driven Design**: Critical system boundaries are defined via interfaces:
+  * [`repository.interfaces.*`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/repository/interfaces): Abstract data access contracts (`IUserRepository`, `IWalletRepository`, `IExpenseRepository`, etc.).
+  * [`strategy.SpendingLimitStrategy`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/strategy/SpendingLimitStrategy.java): Abstraction for spending evaluation rules.
+  * [`observer.WalletEventListener`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/observer/WalletEventListener.java): Abstraction for asynchronous domain event listeners.
+
+---
+
+### 🔗 E. Composition Over Inheritance (HAS-A vs. IS-A)
+Rather than forcing deep, rigid inheritance trees, WalletWise favors object composition:
+* `User` **HAS-A** `Wallet`.
+* `Wallet` **HAS-A** `List<Transaction>` and `List<Expense>`.
+* `Wallet` **HAS-A** `SpendingLimitStrategy` (behavioral composition).
+* `ExpenseService` **HAS-A** `IExpenseRepository` and `IWalletRepository`.
+
+---
+
+## 🏛️ 2. Deep Dive: SOLID Design Principles
+
+| Principle | Meaning & Purpose | Concrete Implementation in WalletWise |
+| :--- | :--- | :--- |
+| **S — Single Responsibility Principle (SRP)** | A class should have one, and only one, reason to change. | • `Wallet`: Manages balance state and domain rules.<br>• `WalletRepository`: Handles JDBC persistence.<br>• `WalletService`: Coordinates transactions and domain logic.<br>• `NotificationObserver`: Handles notification creation.<br>• `WalletPanel`: Renders Swing UI and charts. |
+| **O — Open/Closed Principle (OCP)** | Software entities should be open for extension, but closed for modification. | • Adding a new wallet type (e.g. `StudentWallet`) or expense type (e.g. `TaxDeductibleExpense`) requires creating a new subclass and strategy—**zero changes to existing services or repositories**. |
+| **L — Liskov Substitution Principle (LSP)** | Subtypes must be substitutable for their base types without altering correctness. | • `PersonalWallet` and `BusinessWallet` can be substituted wherever a `Wallet` base reference is expected across `WalletService`, `ExpenseService`, and `ReportService`. |
+| **I — Interface Segregation Principle (ISP)** | Clients should not be forced to depend on interfaces they do not use. | • Instead of a single mega-repository, repository contracts are split into cohesive, domain-specific interfaces: `IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `ISavingsGoalRepository`, `IBudgetRepository`. |
+| **D — Dependency Inversion Principle (DIP)** | High-level modules should depend on abstractions, not concrete details. | • `WalletService`, `ExpenseService`, and `SavingsGoalService` depend exclusively on repository interfaces (`IWalletRepository`), allowing seamless unit testing and mocking via Mockito without a real database. |
+
+---
+
+## 🎨 3. Design Patterns Applied
+
+### 1. Strategy Pattern (`strategy`)
+* **Problem**: `PersonalWallet` enforces an aggregate monthly spending limit, while `BusinessWallet` enforces a per-transaction cap.
+* **Solution**: Extracted the limit-checking algorithm into a `SpendingLimitStrategy` interface with `PersonalLimitStrategy` and `BusinessLimitStrategy`.
+* **Benefit**: Wallets dynamically delegate limit verification to their assigned strategy (`wallet.isLimitExceeded(amount)`), eliminating hardcoded conditional branches.
+
+```
+       ┌────────────────────────┐
+       │ SpendingLimitStrategy  │◄─────────────────┐
+       └───────────▲────────────┘                  │ (delegates to)
+                   │                               │
+       ┌───────────┴───────────┐           ┌───────┴──────┐
+       │                       │           │    Wallet    │
+┌──────────────────────┐ ┌──────────────────────┐  └──────────────┘
+│ PersonalLimitStrategy│ │BusinessLimitStrategy │
+└──────────────────────┘ └──────────────────────┘
+```
+
+---
+
+### 2. Observer Pattern (`observer`)
+* **Problem**: Transactions and completed savings goals need to trigger notifications and award reward points without coupling `WalletService` or UI handlers to notification/reward code.
+* **Solution**: `WalletEventListener` interface with `NotificationObserver` and `RewardObserver` listeners.
+* **Benefit**: `WalletService` emits events (`notifyTransactionCreated`, `notifyGoalAchieved`), and listeners react synchronously and independently.
+
+---
+
+### 3. Static / Simple Factory (`factory`)
+* **Problem**: UI forms instantiate specialized wallet or expense subclasses based on user dropdown selections.
+* **Solution**: `WalletFactory.createWallet(...)` and `ExpenseFactory.createExpense(...)` centralize and encapsulate object creation parameters in one place.
+
+---
+
+## 📐 High-Level Layered Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                 PRESENTATION LAYER (GUI)                    │
+│     Swing Panels, Custom Graphics (Pie Chart, Progress)     │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ (Calls Services Exclusively)
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   BUSINESS SERVICE LAYER                    │
+│     Transaction Orchestration, Domain Rules, Observers      │
+└──────────────┬──────────────────────────────┬───────────────┘
+               │                              │
+               ▼                              ▼
+┌─────────────────────────────┐┌──────────────────────────────┐
+│       STRATEGY LAYER        ││        OBSERVER LAYER        │
+│ Spending Limit Calculations ││ Notifications & Gamification │
+└─────────────────────────────┘└──────────────────────────────┘
+               │
+               ▼ (Uses Repository Interfaces)
+┌─────────────────────────────────────────────────────────────┐
+│                  DATA PERSISTENCE LAYER                     │
+│    Repository Interfaces (CRUD) & MySQL JDBC Implementations│
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     DATABASE / STORAGE                      │
+│             MySQL 8.0+ / H2 In-Memory (Tests)               │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -98,21 +161,21 @@ Database (MySQL 8.0+ / H2 In-Memory for Tests)
 
 ```
 WalletWise/
+├── pom.xml                                 # Maven configuration & dependencies
 ├── database/
-│   └── schema.sql                          # MySQL database schema definition
-├── pom.xml                                 # Maven project descriptor & dependencies
+│   └── schema.sql                          # MySQL relational database schema
 ├── src/
 │   ├── main/java/
 │   │   ├── factory/                        # Creational Factories (WalletFactory, ExpenseFactory)
-│   │   ├── gui/                            # Presentation Layer (Swing GUI Panels & MainFrame)
+│   │   ├── gui/                            # Presentation (Swing GUI Panels & MainFrame)
 │   │   │   ├── Main.java                   # Application Entrypoint
-│   │   │   ├── MainFrame.java              # Main Dashboard Window
+│   │   │   ├── MainFrame.java              # Main Dashboard Container
 │   │   │   ├── LoginRegisterFrame.java     # Authentication Frame
 │   │   │   ├── WalletPanel.java            # Wallet Metrics & Visual Pie Chart
 │   │   │   ├── ExpensePanel.java           # Expense Logging & History
-│   │   │   ├── BudgetPanel.java            # Budget Limits & Status
+│   │   │   ├── BudgetPanel.java            # Budget Tracking
 │   │   │   ├── SavingsPanel.java           # Savings Goals & Contributions
-│   │   │   ├── NotificationPanel.java      # Notification Center
+│   │   │   ├── NotificationPanel.java      # Notifications Center
 │   │   │   ├── RewardPanel.java            # Points & Achievements
 │   │   │   └── ReportPanel.java            # Financial Reports & Itemized Viewer
 │   │   ├── model/                          # Domain Entities (User, Wallet, Expense, etc.)
@@ -120,7 +183,7 @@ WalletWise/
 │   │   ├── observer/                       # Event Observers (NotificationObserver, RewardObserver)
 │   │   ├── repository/                     # Repository Implementations (JDBC SQL)
 │   │   │   └── interfaces/                 # Repository Interfaces (IUserRepository, IWalletRepository, etc.)
-│   │   ├── service/                        # Business Logic & JDBC Transaction Orchestration
+│   │   ├── service/                        # Business Logic & JDBC Transaction Management
 │   │   ├── strategy/                       # Spending Limit Strategies (PersonalLimitStrategy, BusinessLimitStrategy)
 │   │   └── util/                           # Utilities (DBConnection)
 │   └── test/java/
@@ -128,9 +191,21 @@ WalletWise/
 │       ├── observer/                       # Observer Pattern Unit Tests
 │       ├── service/                        # Service Unit Tests (Mockito)
 │       └── strategy/                       # Strategy Pattern Unit Tests
-├── .env                                    # Local environment configuration (Git ignored)
-├── .env.example                            # Environment template
-└── README.md                               # Project Documentation
+└── README.md
+```
+
+---
+
+## 🧪 Testing & Verification
+
+The project includes an automated test suite with **100% pass rate**:
+
+* **Unit Tests (Mockito)**: [`UserServiceTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/service/UserServiceTest.java), [`WalletObserverTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/observer/WalletObserverTest.java), [`SpendingLimitStrategyTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/strategy/SpendingLimitStrategyTest.java).
+* **Integration Tests (H2 Database)**: [`TransactionIntegrityIntegrationTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/integration/TransactionIntegrityIntegrationTest.java) verifying atomic JDBC transactions, commit, and rollback behavior.
+
+```bash
+# Run tests with Maven
+mvn clean test
 ```
 
 ---
@@ -138,37 +213,24 @@ WalletWise/
 ## 🚀 Getting Started
 
 ### 1. Prerequisites
-* **Java Development Kit (JDK)**: Java 17 or higher.
-* **MySQL Database**: MySQL Server 8.0+ running locally or remotely.
+* **Java**: JDK 17 or higher.
+* **MySQL**: MySQL Server 8.0+.
 
 ### 2. Database Setup
-Execute `database/schema.sql` in your MySQL environment:
-
 ```bash
 mysql -u root -p < database/schema.sql
 ```
 
 ### 3. Environment Configuration
-Create a `.env` file in the project root directory (or copy from `.env.example`):
-
+Create a `.env` file in the root directory:
 ```env
-# Database Credentials
 DB_URL=jdbc:mysql://localhost:3306/finance_manager
 DB_USER=root
-DB_PASSWORD=your_mysql_password
+DB_PASSWORD=your_password
 ```
 
-### 4. Build and Test
-Run tests using standard Maven:
-
-```bash
-mvn clean test
-```
-
-### 5. Running the Application
-Launch via Maven or your IDE:
-
+### 4. Run the Application
 ```bash
 mvn compile exec:java -Dexec.mainClass="gui.Main"
 ```
-Or directly execute `gui.Main.main()` in VS Code / IntelliJ / Eclipse.
+Or execute `gui.Main.main()` in your IDE.
