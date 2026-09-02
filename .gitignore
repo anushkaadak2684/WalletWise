@@ -1,8 +1,9 @@
 # Local environment variables
 .env
 
-# Compiled class files
+# Compiled class files & build artifacts
 bin/
+target/
 *.class
 
 # IDE configurations
