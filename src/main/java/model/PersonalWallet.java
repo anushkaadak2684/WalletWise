@@ -1,7 +1,6 @@
 package model;
 
 import model.enums.WalletType;
-import strategy.PersonalLimitStrategy;
 
 import java.math.BigDecimal;
 
@@ -11,23 +10,19 @@ public class PersonalWallet extends Wallet {
     public PersonalWallet() {
         super();
         this.monthlySpendingLimit = new BigDecimal("50000");
-        setSpendingLimitStrategy(new PersonalLimitStrategy());
     }
 
     public PersonalWallet(int walletId,
                           BigDecimal balance,
                           BigDecimal monthlySpendingLimit) {
         super(walletId, balance, WalletType.PERSONAL);
-        this.monthlySpendingLimit = monthlySpendingLimit;
-        setSpendingLimitStrategy(new PersonalLimitStrategy());
+        this.monthlySpendingLimit = monthlySpendingLimit != null ? monthlySpendingLimit : new BigDecimal("50000");
     }
 
-    // Getter
     public BigDecimal getMonthlySpendingLimit() {
         return monthlySpendingLimit;
     }
 
-    // Setter
     public void setMonthlySpendingLimit(BigDecimal monthlySpendingLimit) {
         if (monthlySpendingLimit == null || monthlySpendingLimit.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Monthly spending limit must be greater than zero");
@@ -38,6 +33,19 @@ public class PersonalWallet extends Wallet {
     @Override
     public BigDecimal calculateTransactionLimit() {
         return monthlySpendingLimit;
+    }
+
+    @Override
+    public boolean isLimitExceeded(BigDecimal newAmount) {
+        if (monthlySpendingLimit == null || monthlySpendingLimit.compareTo(BigDecimal.ZERO) <= 0 || newAmount == null) {
+            return false;
+        }
+        return newAmount.compareTo(monthlySpendingLimit) > 0;
+    }
+
+    @Override
+    public String getLimitWarningMessage() {
+        return "Monthly spending limit exceeded (Limit: ₹" + monthlySpendingLimit + ")";
     }
 
     public void showPersonalWalletBenefits() {

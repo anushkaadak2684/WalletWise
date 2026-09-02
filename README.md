@@ -1,26 +1,27 @@
 # 💳 WalletWise — Object-Oriented Finance & Digital Wallet Tracker
 
-**WalletWise** is an enterprise-grade personal finance and digital wallet system crafted to demonstrate advanced **Object-Oriented Programming (OOP)**, **SOLID Design Principles**, and **Software Design Patterns** in Java.
+**WalletWise** is an enterprise-grade personal finance and digital wallet system crafted to demonstrate **Object-Oriented Programming (OOP)**, **SOLID Design Principles**, and pragmatic software design in Java.
 
-While featuring a fully functional Swing GUI (FlatLaf) and MySQL persistence, the core focus of this project is **clean domain modeling, modular architecture, and extensible object-oriented design**.
+While featuring a modern dark Swing GUI (FlatLaf), BCrypt password hashing, and MySQL/H2 persistence, the core philosophy of this project is **clean domain modeling, pure OOP polymorphism, and maintainable software architecture without unnecessary over-engineering**.
 
 ---
 
-## 🎯 Core Engineering Objectives
+## 🎯 Core Engineering Philosophy
 
-* **Mastery of OOP Pillars**: Practical application of Encapsulation, Inheritance, Polymorphism, Abstraction, and Composition.
-* **Adherence to SOLID Principles**: Decoupled, maintainable, and testable design.
-* **Practical Design Patterns**: Applied Strategy, Observer, and Factory patterns to solve real domain problems without over-engineering.
-* **Separation of Concerns**: Strict layered architecture separating Presentation, Business Logic, and Data Persistence.
+* **Pure OOP Polymorphism & Inheritance**: Distinct business behaviors (e.g. personal monthly limits vs. business per-transaction limits, fixed recurring bills vs. variable expenses) are modeled directly through class hierarchies and polymorphic method dispatch.
+* **Pragmatic Simplicity**: Avoids over-engineered pattern proliferation (such as redundant Strategy wrappers or trivial factory classes) when clean OOP polymorphism solves the domain problem directly.
+* **Adherence to SOLID Principles**: Single Responsibility (SRP), Open/Closed (OCP), Liskov Substitution (LSP), Interface Segregation (ISP), and Dependency Inversion (DIP).
+* **Decoupled Event Handling**: Synchronous **Observer Pattern** cleanly separates financial transactions from system notifications and gamified rewards.
+* **Atomic JDBC Transactions**: Full data integrity and rollback protection on multi-table database operations.
 
 ---
 
 ## 🧩 1. Deep Dive: Object-Oriented Programming (OOP) Concepts
 
-### 🔒 A. Encapsulation & Domain Integrity
-* **Private State Scoping**: All class attributes across domain models (`User`, `Wallet`, `Expense`, `Budget`, `SavingsGoal`) are declared `private` to prevent unauthorized external state mutation.
-* **Invariant Enforcement**: Setters and business methods enforce strict business validations (e.g., preventing negative deposits/withdrawals, validating date ranges, ensuring positive spending limits).
-* **Defensive Copying**: Collections within domain objects (e.g., `wallet.getTransactions()`, `wallet.getExpenses()`) return defensive copies (`new ArrayList<>(transactions)`) to preserve encapsulation.
+### 🔒 A. Encapsulation & Invariant Protection
+* **Private Attribute Scoping**: All class fields across domain models (`User`, `Wallet`, `Expense`, `Budget`, `SavingsGoal`, `Transaction`, `Reward`, `Notification`) are strictly `private`.
+* **Business Rule Validation**: Modifiers and business methods validate invariants before state mutations (e.g., non-negative balances, non-zero deposits/withdrawals, valid date bounds).
+* **Defensive Copying**: Collections within domain objects return defensive copies (`new ArrayList<>(transactions)`, `new ArrayList<>(expenses)`) to protect internal state from external tampering.
 
 ```java
 public void deposit(BigDecimal amount) {
@@ -33,46 +34,56 @@ public void deposit(BigDecimal amount) {
 
 ---
 
-### 🏛️ B. Inheritance & Class Hierarchies
-* **Abstract Base Classes**: `Wallet` and `Expense` provide shared attributes (id, balance, date, amount) and template behavior, while leaving specialized logic to concrete subclasses.
-* **Specialized Subclasses**:
-  * `PersonalWallet` & `BusinessWallet` extend `Wallet`, introducing monthly aggregate limits vs. per-transaction limits.
-  * `FixedExpense` & `VariableExpense` extend `Expense`, introducing recurring frequencies (`MONTHLY`, `WEEKLY`) vs. expected maximum amounts.
+### 🏛️ B. Inheritance & Abstract Base Classes
+* **Abstract Base Classes**: `Wallet` and `Expense` provide shared attributes and core functionality while defining contracts for specialized behavior:
+  * `PersonalWallet` & `BusinessWallet` inherit from `Wallet`.
+  * `FixedExpense` & `VariableExpense` inherit from `Expense`.
 
 ```
-            ┌─────────────────┐
-            │  Wallet (Abstr) │
-            └────────┬────────┘
-                     │
-         ┌───────────┴───────────┐
-         │                       │
-┌────────────────┐      ┌─────────────────┐
-│ PersonalWallet │      │ BusinessWallet  │
-└────────────────┘      └─────────────────┘
+                  ┌─────────────────┐
+                  │  Wallet (Abstr) │
+                  └────────┬────────┘
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+    ┌────────────────┐          ┌─────────────────┐
+    │ PersonalWallet │          │ BusinessWallet  │
+    └────────────────┘          └─────────────────┘
 ```
 
 ---
 
-### 🎭 C. Polymorphism & Dynamic Dispatch
-* **Dynamic Method Dispatch**: Base references (`Wallet wallet`, `Expense expense`) uniformly invoke polymorphic methods like `calculateTransactionLimit()` and `displayDetails()` without requiring runtime type casting.
-* **Elimination of Type Switching**: Instead of using brittle `if (wallet instanceof PersonalWallet)` condition blocks throughout services and UI panels, behavior is resolved polymorphically through class hierarchies and Strategy objects.
+### 🎭 C. Pure Polymorphism & Dynamic Method Dispatch
+* **Polymorphic Method Resolution**: Base references uniformly invoke polymorphic domain methods without runtime type inspection (`instanceof`):
+  * `wallet.calculateTransactionLimit()`
+  * `wallet.isLimitExceeded(amount)`
+  * `wallet.getLimitWarningMessage()`
+* **How Subclasses Specialize Behavior**:
+  * `PersonalWallet`: Evaluates spending against the aggregate **monthly spending limit**.
+  * `BusinessWallet`: Evaluates transactions against a **single per-transaction threshold**.
+
+```java
+// Example: Uniform polymorphic invocation
+Wallet wallet = walletService.getWalletByUserId(userId);
+if (wallet.isLimitExceeded(expenseAmount)) {
+    UIHelper.showWarning(this, wallet.getLimitWarningMessage());
+}
+```
 
 ---
 
-### 🧱 D. Abstraction & Interface Segregation
-* **Interface-Driven Design**: Critical system boundaries are defined via interfaces:
-  * [`repository.interfaces.*`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/repository/interfaces): Abstract data access contracts (`IUserRepository`, `IWalletRepository`, `IExpenseRepository`, etc.).
-  * [`strategy.SpendingLimitStrategy`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/strategy/SpendingLimitStrategy.java): Abstraction for spending evaluation rules.
-  * [`observer.WalletEventListener`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/observer/WalletEventListener.java): Abstraction for asynchronous domain event listeners.
+### 🧱 D. Abstraction & Interface-Driven Contracts
+* System boundaries and dependencies are modeled using focused interfaces:
+  * [`repository.interfaces.*`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/repository/interfaces): Abstract data access contracts (`IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `IExpenseRepository`, `IBudgetRepository`, `ISavingsGoalRepository`, `INotificationRepository`, `IRewardRepository`, `IReportRepository`).
+  * [`observer.WalletEventListener`](file:///c:/Users/anush/Downloads/WalletWise/src/main/java/observer/WalletEventListener.java): Contract for domain event subscribers.
 
 ---
 
-### 🔗 E. Composition Over Inheritance (HAS-A vs. IS-A)
-Rather than forcing deep, rigid inheritance trees, WalletWise favors object composition:
+### 🔗 E. Composition Over Inheritance (HAS-A Relationships)
 * `User` **HAS-A** `Wallet`.
 * `Wallet` **HAS-A** `List<Transaction>` and `List<Expense>`.
-* `Wallet` **HAS-A** `SpendingLimitStrategy` (behavioral composition).
-* `ExpenseService` **HAS-A** `IExpenseRepository` and `IWalletRepository`.
+* `WalletService` **HAS-A** `IWalletRepository` and `ITransactionRepository`.
+* `SavingsGoalService` **HAS-A** `ISavingsGoalRepository`, `IWalletRepository`, and `ITransactionRepository`.
 
 ---
 
@@ -80,45 +91,32 @@ Rather than forcing deep, rigid inheritance trees, WalletWise favors object comp
 
 | Principle | Meaning & Purpose | Concrete Implementation in WalletWise |
 | :--- | :--- | :--- |
-| **S — Single Responsibility Principle (SRP)** | A class should have one, and only one, reason to change. | • `Wallet`: Manages balance state and domain rules.<br>• `WalletRepository`: Handles JDBC persistence.<br>• `WalletService`: Coordinates transactions and domain logic.<br>• `NotificationObserver`: Handles notification creation.<br>• `WalletPanel`: Renders Swing UI and charts. |
-| **O — Open/Closed Principle (OCP)** | Software entities should be open for extension, but closed for modification. | • Adding a new wallet type (e.g. `StudentWallet`) or expense type (e.g. `TaxDeductibleExpense`) requires creating a new subclass and strategy—**zero changes to existing services or repositories**. |
-| **L — Liskov Substitution Principle (LSP)** | Subtypes must be substitutable for their base types without altering correctness. | • `PersonalWallet` and `BusinessWallet` can be substituted wherever a `Wallet` base reference is expected across `WalletService`, `ExpenseService`, and `ReportService`. |
-| **I — Interface Segregation Principle (ISP)** | Clients should not be forced to depend on interfaces they do not use. | • Instead of a single mega-repository, repository contracts are split into cohesive, domain-specific interfaces: `IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `ISavingsGoalRepository`, `IBudgetRepository`. |
-| **D — Dependency Inversion Principle (DIP)** | High-level modules should depend on abstractions, not concrete details. | • `WalletService`, `ExpenseService`, and `SavingsGoalService` depend exclusively on repository interfaces (`IWalletRepository`), allowing seamless unit testing and mocking via Mockito without a real database. |
+| **S — Single Responsibility Principle (SRP)** | A class should have one, and only one, reason to change. | • `Wallet`: Encapsulates balance state and limit rules.<br>• `WalletRepository`: Handles JDBC persistence.<br>• `WalletService`: Coordinates transactions and domain logic.<br>• `NotificationObserver`: Handles notification creation.<br>• `WalletPanel`: Renders Swing UI and charts. |
+| **O — Open/Closed Principle (OCP)** | Open for extension, closed for modification. | • Adding a new wallet type (e.g. `StudentWallet`) or expense classification (e.g. `TaxDeductibleExpense`) only requires adding a new subclass implementing `isLimitExceeded()`—**zero modifications to existing services or repositories**. |
+| **L — Liskov Substitution Principle (LSP)** | Subtypes must be substitutable for their base types. | • `PersonalWallet` and `BusinessWallet` seamlessly substitute `Wallet` across all services, repositories, and UI controllers without unexpected side-effects. |
+| **I — Interface Segregation Principle (ISP)** | Clients should not depend on interfaces they do not use. | • Repositories are cleanly segregated into domain-focused interfaces (`IUserRepository`, `IWalletRepository`, `IExpenseRepository`, etc.) rather than one giant data interface. |
+| **D — Dependency Inversion Principle (DIP)** | High-level modules should depend on abstractions, not concrete details. | • `WalletService`, `ExpenseService`, and `SavingsGoalService` depend strictly on repository interfaces, enabling fast unit testing and mocking via Mockito without a real database. |
 
 ---
 
 ## 🎨 3. Design Patterns Applied
 
-### 1. Strategy Pattern (`strategy`)
-* **Problem**: `PersonalWallet` enforces an aggregate monthly spending limit, while `BusinessWallet` enforces a per-transaction cap.
-* **Solution**: Extracted the limit-checking algorithm into a `SpendingLimitStrategy` interface with `PersonalLimitStrategy` and `BusinessLimitStrategy`.
-* **Benefit**: Wallets dynamically delegate limit verification to their assigned strategy (`wallet.isLimitExceeded(amount)`), eliminating hardcoded conditional branches.
+### Observer Pattern (`observer`)
+* **Problem**: Financial transactions and completed savings goals need to trigger audit notifications and award gamified reward points without coupling the core transaction engine to notification/reward code.
+* **Solution**: `WalletEventListener` defines domain callbacks (`onTransactionCreated`, `onSavingsGoalAchieved`).
+* **Benefit**: `WalletService` and `SavingsGoalService` notify listeners synchronously upon successful commits. `NotificationObserver` creates in-app alerts and `RewardObserver` grants points (+100 pts on goal completion) independently.
 
 ```
-       ┌────────────────────────┐
-       │ SpendingLimitStrategy  │◄─────────────────┐
-       └───────────▲────────────┘                  │ (delegates to)
-                   │                               │
-       ┌───────────┴───────────┐           ┌───────┴──────┐
-       │                       │           │    Wallet    │
-┌──────────────────────┐ ┌──────────────────────┐  └──────────────┘
-│ PersonalLimitStrategy│ │BusinessLimitStrategy │
-└──────────────────────┘ └──────────────────────┘
+       ┌──────────────────────┐
+       │ WalletEventListener  │◄─────────────────┐
+       └──────────▲───────────┘                  │ (subscribes to events)
+                  │                              │
+       ┌──────────┴───────────┐          ┌───────┴────────┐
+       │                      │          │ WalletService  │
+┌───────────────┐     ┌──────────────┐   └────────────────┘
+│NotificationObs│     │RewardObserver│
+└───────────────┘     └──────────────┘
 ```
-
----
-
-### 2. Observer Pattern (`observer`)
-* **Problem**: Transactions and completed savings goals need to trigger notifications and award reward points without coupling `WalletService` or UI handlers to notification/reward code.
-* **Solution**: `WalletEventListener` interface with `NotificationObserver` and `RewardObserver` listeners.
-* **Benefit**: `WalletService` emits events (`notifyTransactionCreated`, `notifyGoalAchieved`), and listeners react synchronously and independently.
-
----
-
-### 3. Static / Simple Factory (`factory`)
-* **Problem**: UI forms instantiate specialized wallet or expense subclasses based on user dropdown selections.
-* **Solution**: `WalletFactory.createWallet(...)` and `ExpenseFactory.createExpense(...)` centralize and encapsulate object creation parameters in one place.
 
 ---
 
@@ -138,8 +136,8 @@ Rather than forcing deep, rigid inheritance trees, WalletWise favors object comp
                │                              │
                ▼                              ▼
 ┌─────────────────────────────┐┌──────────────────────────────┐
-│       STRATEGY LAYER        ││        OBSERVER LAYER        │
-│ Spending Limit Calculations ││ Notifications & Gamification │
+│   DOMAIN MODEL HIERARCHY    ││        OBSERVER LAYER        │
+│ Personal & Business Wallets ││ Notifications & Gamification │
 └─────────────────────────────┘└──────────────────────────────┘
                │
                ▼ (Uses Repository Interfaces)
@@ -161,12 +159,11 @@ Rather than forcing deep, rigid inheritance trees, WalletWise favors object comp
 
 ```
 WalletWise/
-├── pom.xml                                 # Maven configuration & dependencies
+├── pom.xml                                 # Maven build descriptor & dependencies
 ├── database/
 │   └── schema.sql                          # MySQL relational database schema
 ├── src/
 │   ├── main/java/
-│   │   ├── factory/                        # Creational Factories (WalletFactory, ExpenseFactory)
 │   │   ├── gui/                            # Presentation (Swing GUI Panels & MainFrame)
 │   │   │   ├── Main.java                   # Application Entrypoint
 │   │   │   ├── MainFrame.java              # Main Dashboard Container
@@ -184,13 +181,12 @@ WalletWise/
 │   │   ├── repository/                     # Repository Implementations (JDBC SQL)
 │   │   │   └── interfaces/                 # Repository Interfaces (IUserRepository, IWalletRepository, etc.)
 │   │   ├── service/                        # Business Logic & JDBC Transaction Management
-│   │   ├── strategy/                       # Spending Limit Strategies (PersonalLimitStrategy, BusinessLimitStrategy)
 │   │   └── util/                           # Utilities (DBConnection)
 │   └── test/java/
 │       ├── integration/                    # Database Transaction Integration Tests (H2)
+│       ├── model/                          # Polymorphism & Model Unit Tests
 │       ├── observer/                       # Observer Pattern Unit Tests
-│       ├── service/                        # Service Unit Tests (Mockito)
-│       └── strategy/                       # Strategy Pattern Unit Tests
+│       └── service/                        # Service Unit Tests (Mockito)
 └── README.md
 ```
 
@@ -200,8 +196,12 @@ WalletWise/
 
 The project includes an automated test suite with **100% pass rate**:
 
-* **Unit Tests (Mockito)**: [`UserServiceTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/service/UserServiceTest.java), [`WalletObserverTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/observer/WalletObserverTest.java), [`SpendingLimitStrategyTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/strategy/SpendingLimitStrategyTest.java).
-* **Integration Tests (H2 Database)**: [`TransactionIntegrityIntegrationTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/integration/TransactionIntegrityIntegrationTest.java) verifying atomic JDBC transactions, commit, and rollback behavior.
+* **Unit Tests (Mockito & JUnit 5)**:
+  * [`UserServiceTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/service/UserServiceTest.java): Verifies BCrypt password hashing, authentication, and legacy plaintext migration.
+  * [`WalletPolymorphismTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/model/WalletPolymorphismTest.java): Verifies pure polymorphic limit evaluation for `PersonalWallet` and `BusinessWallet`.
+  * [`WalletObserverTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/observer/WalletObserverTest.java): Verifies decoupled observer notification and reward event handling.
+* **Integration Tests (H2 Database)**:
+  * [`TransactionIntegrityIntegrationTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/integration/TransactionIntegrityIntegrationTest.java): Verifies atomic JDBC transactions, commit, and rollback behavior without orphaned records.
 
 ```bash
 # Run tests with Maven

@@ -131,7 +131,9 @@ public class ExpensePanel extends JPanel {
             RecurringFrequency freq = (freqCombo.getSelectedItem() instanceof RecurringFrequency) ? (RecurringFrequency) freqCombo.getSelectedItem() : RecurringFrequency.MONTHLY;
             BigDecimal maxExp = maxExpectedField.getText().trim().isEmpty() ? amount : new BigDecimal(maxExpectedField.getText().trim());
 
-            Expense expense = factory.ExpenseFactory.createExpense(cat, amount, date, desc, typeStr, freq, maxExp);
+            Expense expense = "FIXED".equalsIgnoreCase(typeStr)
+                    ? new model.FixedExpense(0, cat, amount, date, desc, freq)
+                    : new model.VariableExpense(0, cat, amount, date, desc, maxExp);
 
             mainFrame.getExpenseService().addExpense(mainFrame.getCurrentUser(), wallet, expense);
 

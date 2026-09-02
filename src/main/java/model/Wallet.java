@@ -1,7 +1,6 @@
 package model;
 
 import model.enums.WalletType;
-import strategy.SpendingLimitStrategy;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -12,9 +11,8 @@ public abstract class Wallet {
     private int walletId;
     private BigDecimal balance;
     private WalletType walletType;
-    private SpendingLimitStrategy spendingLimitStrategy;
 
-    // Composition
+    // Composition (HAS-A relationship)
     private List<Transaction> transactions;
     private List<Expense> expenses;
 
@@ -26,25 +24,38 @@ public abstract class Wallet {
 
     public Wallet(int walletId, BigDecimal balance, WalletType walletType) {
         this.walletId = walletId;
-        this.balance = balance;
+        this.balance = balance != null ? balance : BigDecimal.ZERO;
         this.walletType = walletType;
         this.transactions = new ArrayList<>();
         this.expenses = new ArrayList<>();
     }
 
-    // Getters
+    // Getters & Setters
     public int getWalletId() {
         return walletId;
+    }
+
+    public void setWalletId(int walletId) {
+        this.walletId = walletId;
     }
 
     public BigDecimal getBalance() {
         return balance;
     }
 
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance != null ? balance : BigDecimal.ZERO;
+    }
+
     public WalletType getWalletType() {
         return walletType;
     }
 
+    public void setWalletType(WalletType walletType) {
+        this.walletType = walletType;
+    }
+
+    // Encapsulation with Defensive Copying
     public List<Transaction> getTransactions() {
         return new ArrayList<>(transactions);
     }
@@ -53,39 +64,12 @@ public abstract class Wallet {
         return new ArrayList<>(expenses);
     }
 
-    public SpendingLimitStrategy getSpendingLimitStrategy() {
-        return spendingLimitStrategy;
-    }
+    // Polymorphic Abstract Methods
+    public abstract BigDecimal calculateTransactionLimit();
+    public abstract boolean isLimitExceeded(BigDecimal newAmount);
+    public abstract String getLimitWarningMessage();
 
-    // Setters
-    public void setWalletId(int walletId) {
-        this.walletId = walletId;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public void setSpendingLimitStrategy(SpendingLimitStrategy spendingLimitStrategy) {
-        this.spendingLimitStrategy = spendingLimitStrategy;
-    }
-
-    // Strategy Pattern integration
-    public boolean isLimitExceeded(BigDecimal newAmount) {
-        if (spendingLimitStrategy != null) {
-            return spendingLimitStrategy.isLimitExceeded(this, newAmount);
-        }
-        return false;
-    }
-
-    public String getLimitWarningMessage() {
-        if (spendingLimitStrategy != null) {
-            return spendingLimitStrategy.getLimitWarningMessage(this);
-        }
-        return "No limit configured";
-    }
-
-    // Common Wallet Operations
+    // Domain Business Operations
     public void deposit(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be greater than zero");
@@ -116,8 +100,6 @@ public abstract class Wallet {
         }
         expenses.add(expense);
     }
-
-    public abstract BigDecimal calculateTransactionLimit();
 
     public void displayWalletDetails() {
         System.out.println("\n========== WALLET DETAILS ==========");

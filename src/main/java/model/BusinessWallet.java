@@ -1,7 +1,6 @@
 package model;
 
 import model.enums.WalletType;
-import strategy.BusinessLimitStrategy;
 
 import java.math.BigDecimal;
 
@@ -11,23 +10,19 @@ public class BusinessWallet extends Wallet {
     public BusinessWallet() {
         super();
         this.businessTransactionLimit = new BigDecimal("500000");
-        setSpendingLimitStrategy(new BusinessLimitStrategy());
     }
 
     public BusinessWallet(int walletId,
                           BigDecimal balance,
                           BigDecimal businessTransactionLimit) {
         super(walletId, balance, WalletType.BUSINESS);
-        this.businessTransactionLimit = businessTransactionLimit;
-        setSpendingLimitStrategy(new BusinessLimitStrategy());
+        this.businessTransactionLimit = businessTransactionLimit != null ? businessTransactionLimit : new BigDecimal("500000");
     }
 
-    // Getter
     public BigDecimal getBusinessTransactionLimit() {
         return businessTransactionLimit;
     }
 
-    // Setter
     public void setBusinessTransactionLimit(BigDecimal businessTransactionLimit) {
         if (businessTransactionLimit == null || businessTransactionLimit.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Business transaction limit must be greater than zero");
@@ -38,6 +33,19 @@ public class BusinessWallet extends Wallet {
     @Override
     public BigDecimal calculateTransactionLimit() {
         return businessTransactionLimit;
+    }
+
+    @Override
+    public boolean isLimitExceeded(BigDecimal newAmount) {
+        if (businessTransactionLimit == null || businessTransactionLimit.compareTo(BigDecimal.ZERO) <= 0 || newAmount == null) {
+            return false;
+        }
+        return newAmount.compareTo(businessTransactionLimit) > 0;
+    }
+
+    @Override
+    public String getLimitWarningMessage() {
+        return "Per-transaction limit exceeded (Limit: ₹" + businessTransactionLimit + ")";
     }
 
     public void showBusinessWalletBenefits() {

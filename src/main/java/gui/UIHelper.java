@@ -1,5 +1,7 @@
 package gui;
 
+import model.BusinessWallet;
+import model.PersonalWallet;
 import model.User;
 import model.Wallet;
 import model.enums.WalletType;
@@ -172,7 +174,9 @@ public class UIHelper {
                 }
 
                 WalletType type = (WalletType) typeCombo.getSelectedItem();
-                Wallet wallet = factory.WalletFactory.createWallet(type, balance, limit);
+                Wallet wallet = (type == WalletType.PERSONAL)
+                        ? new PersonalWallet(0, balance, limit)
+                        : new BusinessWallet(0, balance, limit);
 
                 frame.getWalletService().createWallet(wallet, user.getUserId());
                 frame.getUserService().assignWallet(user, wallet);
