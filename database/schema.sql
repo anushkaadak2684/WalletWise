@@ -28,7 +28,7 @@ CREATE TABLE wallets(
     balance DECIMAL(10,2) DEFAULT 0,
     wallet_type VARCHAR(20) NOT NULL,
     monthly_spending_limit DECIMAL(10,2),
-    business_transaction_limit DECIMAL(10,2);
+    business_transaction_limit DECIMAL(10,2),
 
     FOREIGN KEY(user_id)
     REFERENCES users(user_id)
