@@ -1,6 +1,6 @@
 # 💳 WalletWise - Digital Wallet & Personal Finance Tracker
 
-A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt password security, atomic database transactions, and gamified reward tracking.
+A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt password security, and gamified reward tracking.
 
 ---
 
@@ -50,7 +50,7 @@ A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** f
 * **Open/Closed Principle (OCP)**: Modular architecture allows adding new wallet types or expense classifications by extending base classes without modifying core service or repository logic.
 * **Liskov Substitution Principle (LSP)**: Derived classes (`PersonalWallet`, `BusinessWallet`) seamlessly substitute base `Wallet` instances across all services and reports without unexpected behavior.
 * **Interface Segregation Principle (ISP)**: Fine-grained repository contracts isolated inside `repository.interfaces` (`IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `IExpenseRepository`, `IBudgetRepository`, `ISavingsGoalRepository`, `INotificationRepository`, `IRewardRepository`, `IReportRepository`).
-* **Dependency Inversion Principle (DIP)**: Service classes depend directly on interface abstractions rather than tight coupling to concrete MySQL repository implementations, enabling unit testing with Mockito.
+* **Dependency Inversion Principle (DIP)**: Service classes depend directly on interface abstractions rather than tight coupling to concrete MySQL repository implementations.
 
 ### 🎨 3. Design Patterns
 * **Observer Pattern**: `WalletEventListener` along with `NotificationObserver` and `RewardObserver` reacts synchronously to wallet transactions and completed savings milestones, completely decoupling side-effects from core business logic.
@@ -71,9 +71,9 @@ A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** f
 * **Language**: Java 17+
 * **Build System**: Apache Maven
 * **GUI Framework**: Java Swing with FlatLaf (FlatDarkLaf)
-* **Database**: MySQL 8.0+ (Production) & H2 Database (Integration Testing)
+* **Database**: MySQL 8.0+
+* **JDBC Driver**: MySQL Connector/J
 * **Security**: Favre BCrypt 0.10.2
-* **Testing**: JUnit 5 (Jupiter) & Mockito
 * **Architecture**: Layered Architecture (Model/Enums - Repository/Interfaces - Service - Observer - GUI)
 
 ---
@@ -84,57 +84,39 @@ A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** f
 WalletWise/
 ├── database/
 │   └── schema.sql                  # Full MySQL database schema definition
+├── lib/
+│   ├── flatlaf-3.5.2.jar           # FlatLaf dark look-and-feel library
+│   ├── bcrypt-0.10.2.jar           # BCrypt security library
+│   ├── bytes-1.5.0.jar             # Byte array utility for BCrypt
+│   └── mysql-connector-j-26.7.0.jar# MySQL JDBC Database driver
 ├── pom.xml                         # Maven build descriptor & dependencies
 ├── src/
-│   ├── main/java/
-│   │   ├── gui/                    # Swing GUI Components & Main Dashboard
-│   │   │   ├── Main.java           # Application Entrypoint
-│   │   │   ├── MainFrame.java      # Main Dashboard Window
-│   │   │   ├── LoginRegisterFrame.java # Auth Window
-│   │   │   ├── WalletPanel.java    # Wallet Metrics & Pie Chart
-│   │   │   ├── ExpensePanel.java   # Expense Logging & History
-│   │   │   ├── BudgetPanel.java    # Budget Tracking
-│   │   │   ├── SavingsPanel.java   # Savings Goals & Contributions
-│   │   │   ├── NotificationPanel.java # Notifications Center
-│   │   │   ├── RewardPanel.java    # Points & Achievements
-│   │   │   ├── ReportPanel.java    # Financial Reports & Side-Pane Viewer
-│   │   │   ├── Theme.java          # Look and Feel Styling
-│   │   │   └── UIHelper.java       # Reusable UI Helpers & Dialogs
-│   │   ├── model/                  # Domain Entities (User, Wallet, Expense, etc.)
-│   │   │   └── enums/              # Enum Definitions (WalletType, ExpenseCategory, etc.)
-│   │   ├── observer/               # Event Observers (NotificationObserver, RewardObserver)
-│   │   ├── repository/             # Concrete Repository Implementations (MySQL queries)
-│   │   │   └── interfaces/         # Repository Interfaces (IUserRepository, IWalletRepository, etc.)
-│   │   ├── service/                # Business Logic & JDBC Transaction Management
-│   │   └── util/                   # Utilities (DBConnection)
-│   └── test/java/
-│       ├── integration/            # Database Transaction Integration Tests (H2)
-│       ├── model/                  # Polymorphism & Domain Unit Tests
-│       ├── observer/               # Observer Pattern Unit Tests
-│       └── service/                # Service Unit Tests (Mockito)
+│   └── main/java/
+│       ├── gui/                    # Swing GUI Components & Main Dashboard
+│       │   ├── Main.java           # Application Entrypoint
+│       │   ├── MainFrame.java      # Main Dashboard Window
+│       │   ├── LoginRegisterFrame.java # Auth Window
+│       │   ├── WalletPanel.java    # Wallet Metrics & Pie Chart
+│       │   ├── ExpensePanel.java   # Expense Logging & History
+│       │   ├── BudgetPanel.java    # Budget Tracking
+│       │   ├── SavingsPanel.java   # Savings Goals & Contributions
+│       │   ├── NotificationPanel.java # Notifications Center
+│       │   ├── RewardPanel.java    # Points & Achievements
+│       │   ├── ReportPanel.java    # Financial Reports & Side-Pane Viewer
+│       │   ├── Theme.java          # Look and Feel Styling
+│       │   └── UIHelper.java       # Reusable UI Helpers & Dialogs
+│       ├── model/                  # Domain Entities (User, Wallet, Expense, etc.)
+│       │   └── enums/              # Enum Definitions (WalletType, ExpenseCategory, etc.)
+│       ├── observer/               # Event Observers (NotificationObserver, RewardObserver)
+│       ├── repository/             # Concrete Repository Implementations (MySQL queries)
+│       │   └── interfaces/         # Repository Interfaces (IUserRepository, IWalletRepository, etc.)
+│       ├── service/                # Business Logic & JDBC Transaction Management
+│       └── util/                   # Utilities (DBConnection)
 ├── .env                            # Local environment configuration (Git ignored)
 ├── .env.example                    # Environment template
 ├── .gitignore                      # Git ignore rules
 └── README.md                       # Project Documentation
 ```
-
----
-
-## 🧪 Automated Testing
-
-The project includes an automated test suite with **100% pass rate** (10/10 tests passing):
-
-```bash
-# Run unit & integration tests with Maven
-mvn clean test
-```
-
-* **Unit Tests (Mockito & JUnit 5)**:
-  * [`UserServiceTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/service/UserServiceTest.java): Verifies BCrypt password hashing, authentication, and legacy plaintext migration.
-  * [`WalletPolymorphismTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/model/WalletPolymorphismTest.java): Verifies pure polymorphic limit evaluation for `PersonalWallet` and `BusinessWallet`.
-  * [`WalletObserverTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/observer/WalletObserverTest.java): Verifies decoupled observer notification and reward event handling.
-* **Integration Tests (H2 Database)**:
-  * [`TransactionIntegrityIntegrationTest`](file:///c:/Users/anush/Downloads/WalletWise/src/test/java/integration/TransactionIntegrityIntegrationTest.java): Verifies atomic JDBC commit and rollback behavior.
 
 ---
 
