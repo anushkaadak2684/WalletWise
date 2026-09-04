@@ -1,6 +1,6 @@
 # 💳 WalletWise - Digital Wallet & Personal Finance Tracker
 
-A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt password security, and gamified reward tracking.
+A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt password security, proactive overspending alerts, and gamified reward tracking.
 
 ---
 
@@ -30,6 +30,10 @@ A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** f
 * **Goal Contributions**: Deposit funds directly into savings goals from your active wallet balance in an atomic transaction.
 * **Gamification**: Earn **+100 Reward Points** and system achievement notifications automatically upon completing a savings goal via the Observer Pattern.
 
+### 🔔 Notifications & Smart Alerts
+* In-app Notification Center tracking transaction receipts, savings milestones, and unread badges.
+* **Proactive Alerts**: Immediate warnings on spending limit overruns and 80%/100% budget threshold triggers.
+
 ### 📊 Comprehensive Financial Reports
 * Generate periodical reports (**Monthly**, **Yearly**, **Custom**).
 * **Itemized Side-Pane Viewer**: Synchronized dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
@@ -53,7 +57,7 @@ A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** f
 * **Dependency Inversion Principle (DIP)**: Service classes depend directly on interface abstractions rather than tight coupling to concrete MySQL repository implementations.
 
 ### 🎨 3. Design Patterns
-* **Observer Pattern**: `WalletEventListener` along with `NotificationObserver` and `RewardObserver` reacts synchronously to wallet transactions and completed savings milestones, completely decoupling side-effects from core business logic.
+* **Observer Pattern**: `WalletEventListener` along with `NotificationObserver` and `RewardObserver` reacts synchronously to wallet transactions, completed savings milestones, and overspending triggers, completely decoupling side-effects from core business logic.
 * **Repository Pattern**: Decouples domain entities and services from low-level JDBC SQL queries while managing connection-aware transaction boundaries.
 
 ---
