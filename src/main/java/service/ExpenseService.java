@@ -5,6 +5,7 @@ import model.Transaction;
 import model.User;
 import model.Wallet;
 import model.enums.TransactionType;
+import observer.WalletEventListener;
 import repository.interfaces.IExpenseRepository;
 import repository.interfaces.ITransactionRepository;
 import repository.interfaces.IWalletRepository;
@@ -13,6 +14,7 @@ import util.DBConnection;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExpenseService {
@@ -20,6 +22,7 @@ public class ExpenseService {
     private IExpenseRepository expenseRepository;
     private IWalletRepository walletRepository;
     private ITransactionRepository transactionRepository;
+    private List<WalletEventListener> observers = new ArrayList<>();
 
     public ExpenseService(IExpenseRepository expenseRepository,
                           IWalletRepository walletRepository,
@@ -28,6 +31,18 @@ public class ExpenseService {
         this.expenseRepository = expenseRepository;
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
+    }
+
+    public void addObserver(WalletEventListener listener) {
+        if (listener != null) {
+            observers.add(listener);
+        }
+    }
+
+    private void notifySpendingLimitExceeded(User user, Wallet wallet, BigDecimal amount) {
+        for (WalletEventListener listener : observers) {
+            listener.onSpendingLimitExceeded(user, wallet, amount);
+        }
     }
 
     // Add Expense
@@ -78,6 +93,10 @@ public class ExpenseService {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Database error adding expense: " + e.getMessage(), e);
+        }
+
+        if (wallet.isLimitExceeded(amount)) {
+            notifySpendingLimitExceeded(user, wallet, amount);
         }
     }
 

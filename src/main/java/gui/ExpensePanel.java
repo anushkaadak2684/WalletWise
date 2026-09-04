@@ -2,12 +2,10 @@ package gui;
 
 import model.Budget;
 import model.Expense;
-import model.FixedExpense;
-import model.VariableExpense;
-import model.Wallet;
 import model.enums.ExpenseCategory;
 import model.enums.NotificationType;
 import model.enums.RecurringFrequency;
+import model.Wallet;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -29,80 +27,79 @@ public class ExpensePanel extends JPanel {
     private JTextField descField;
     private JComboBox<RecurringFrequency> freqCombo;
     private JTextField maxExpectedField;
-    private JLabel freqLabel;
-    private JLabel maxLabel;
 
     private DefaultTableModel tableModel;
 
     public ExpensePanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
+        setLayout(new BorderLayout(0, 15));
         setBorder(new EmptyBorder(15, 15, 15, 15));
+
         initUI();
     }
 
     private void initUI() {
-        // Form Panel
-        JPanel formCard = new JPanel(new GridBagLayout());
-        formCard.setBorder(BorderFactory.createTitledBorder("Log New Expense"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6); gbc.fill = GridBagConstraints.HORIZONTAL;
+        // TOP: Add Expense Form
+        JPanel formCard = UIHelper.createCardPanel("Log New Expense");
+        JPanel formGrid = new JPanel(new GridLayout(4, 4, 12, 12));
+        formGrid.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        gbc.gridx = 0; gbc.gridy = 0; formCard.add(new JLabel("Category:"), gbc);
-        gbc.gridx = 1; catCombo = new JComboBox<>(ExpenseCategory.values()); formCard.add(catCombo, gbc);
+        formGrid.add(new JLabel("Category:"));
+        catCombo = new JComboBox<>(ExpenseCategory.values());
+        formGrid.add(catCombo);
 
-        gbc.gridx = 2; formCard.add(new JLabel("Expense Type:"), gbc);
-        gbc.gridx = 3; typeCombo = new JComboBox<>(new String[]{"FIXED", "VARIABLE"});
-        typeCombo.addActionListener(e -> updateTypeFields());
-        formCard.add(typeCombo, gbc);
+        formGrid.add(new JLabel("Expense Type:"));
+        typeCombo = new JComboBox<>(new String[]{"VARIABLE", "FIXED"});
+        formGrid.add(typeCombo);
 
-        gbc.gridx = 0; gbc.gridy = 1; formCard.add(new JLabel("Amount (₹):"), gbc);
-        gbc.gridx = 1; amountField = new JTextField(12); formCard.add(amountField, gbc);
+        formGrid.add(new JLabel("Amount (₹):"));
+        amountField = new JTextField();
+        formGrid.add(amountField);
 
-        gbc.gridx = 2; formCard.add(new JLabel("Date (YYYY-MM-DD):"), gbc);
-        gbc.gridx = 3; dateField = new JTextField(LocalDate.now().toString(), 12); formCard.add(dateField, gbc);
+        formGrid.add(new JLabel("Date (YYYY-MM-DD):"));
+        dateField = new JTextField(LocalDate.now().toString());
+        formGrid.add(dateField);
 
-        gbc.gridx = 0; gbc.gridy = 2; formCard.add(new JLabel("Description:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3; descField = new JTextField(30); formCard.add(descField, gbc);
-        gbc.gridwidth = 1;
+        formGrid.add(new JLabel("Description:"));
+        descField = new JTextField();
+        formGrid.add(descField);
 
-        gbc.gridx = 0; gbc.gridy = 3; freqLabel = new JLabel("Recurring Freq:"); formCard.add(freqLabel, gbc);
-        gbc.gridx = 1; freqCombo = new JComboBox<>(RecurringFrequency.values()); formCard.add(freqCombo, gbc);
+        formGrid.add(new JLabel("Frequency (Fixed):"));
+        freqCombo = new JComboBox<>(RecurringFrequency.values());
+        formGrid.add(freqCombo);
 
-        gbc.gridx = 2; maxLabel = new JLabel("Max Expected Amount:"); formCard.add(maxLabel, gbc);
-        gbc.gridx = 3; maxExpectedField = new JTextField("0.00", 12); formCard.add(maxExpectedField, gbc);
+        formGrid.add(new JLabel("Max Expected (₹):"));
+        maxExpectedField = new JTextField();
+        formGrid.add(maxExpectedField);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 4;
-        JButton addExpBtn = UIHelper.createBlueButton("Add Expense");
-        addExpBtn.addActionListener(e -> handleAddExpense());
-        formCard.add(addExpBtn, gbc);
+        JButton addBtn = UIHelper.createBlueButton("Record Expense");
+        addBtn.addActionListener(e -> handleAddExpense());
+        formGrid.add(addBtn);
 
+        formCard.add(formGrid, BorderLayout.CENTER);
         add(formCard, BorderLayout.NORTH);
 
-        // Table
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Type", "Category", "Amount", "Date", "Description", "Details"}, 0);
+        // CENTER: Expense Table
+        JPanel tableCard = UIHelper.createCardPanel("Expense History");
+        String[] cols = {"ID", "Category", "Amount", "Date", "Description", "Type", "Details"};
+        tableModel = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+
         JTable table = new JTable(tableModel);
+        table.setRowHeight(28);
+        tableCard.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        // Bottom Actions
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton deleteBtn = new JButton("Delete Selected");
+        deleteBtn.addActionListener(e -> handleDeleteExpense(table));
+        actionPanel.add(deleteBtn);
+        tableCard.add(actionPanel, BorderLayout.SOUTH);
 
-        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton deleteExpBtn = UIHelper.createBlueButton("Delete Selected Expense");
-        deleteExpBtn.addActionListener(e -> handleDeleteExpense(table));
-        bottomBtnPanel.add(deleteExpBtn);
-
-        centerPanel.add(bottomBtnPanel, BorderLayout.SOUTH);
-        add(centerPanel, BorderLayout.CENTER);
-
-        updateTypeFields();
-    }
-
-    private void updateTypeFields() {
-        boolean isFixed = "FIXED".equals(typeCombo.getSelectedItem());
-        freqLabel.setEnabled(isFixed);
-        freqCombo.setEnabled(isFixed);
-        maxLabel.setEnabled(!isFixed);
-        maxExpectedField.setEnabled(!isFixed);
+        add(tableCard, BorderLayout.CENTER);
     }
 
     public void refreshData() {
@@ -111,9 +108,23 @@ public class ExpensePanel extends JPanel {
 
         List<Expense> expenses = mainFrame.getExpenseService().getExpensesByWallet(wallet.getWalletId());
         tableModel.setRowCount(0);
-        for (Expense e : expenses) {
-            String details = (e instanceof FixedExpense) ? "Freq: " + ((FixedExpense) e).getRecurringFrequency() : "Max Expected: ₹" + ((VariableExpense) e).getMaximumExpectedAmount();
-            tableModel.addRow(new Object[]{e.getExpenseId(), e.getExpenseType(), e.getCategory(), "₹" + e.getAmount().toPlainString(), e.getDate().toString(), e.getDescription(), details});
+        for (Expense exp : expenses) {
+            String details = "-";
+            if (exp instanceof model.FixedExpense) {
+                details = "Freq: " + ((model.FixedExpense) exp).getRecurringFrequency();
+            } else if (exp instanceof model.VariableExpense) {
+                details = "Max: ₹" + ((model.VariableExpense) exp).getMaximumExpectedAmount();
+            }
+
+            tableModel.addRow(new Object[]{
+                    exp.getExpenseId(),
+                    exp.getCategory(),
+                    "₹" + exp.getAmount().toPlainString(),
+                    exp.getDate().toString(),
+                    exp.getDescription() != null ? exp.getDescription() : "-",
+                    exp.getClass().getSimpleName().replace("Expense", ""),
+                    details
+            });
         }
     }
 
@@ -144,17 +155,36 @@ public class ExpensePanel extends JPanel {
                     NotificationType.TRANSACTION_ALERT
             );
 
-            // Update Budget spent amount & check exceeded
+            // Proactive Wallet Limit Check
+            if (wallet.isLimitExceeded(amount)) {
+                UIHelper.showWarning(this, "[SPENDING LIMIT WARNING]\n" + wallet.getLimitWarningMessage() + "\nPlease review your expenses to avoid jeopardizing your active savings and budgets.");
+            }
+
+            // Proactive Category Budget Check (80% Caution & 100% Exceeded)
             List<Budget> budgets = mainFrame.getBudgetService().getBudgetsByWallet(wallet.getWalletId());
             for (Budget b : budgets) {
                 if (b.getCategory() == cat) {
                     mainFrame.getBudgetService().updateBudget(b, amount);
+                    BigDecimal newSpent = b.getSpentAmount();
+                    BigDecimal budgetLimit = b.getLimitAmount();
+
                     if (mainFrame.getBudgetService().isBudgetExceeded(b)) {
+                        String alertMsg = "[BUDGET EXCEEDED] Category " + cat + " (Spent: ₹" + newSpent + " / Limit: ₹" + budgetLimit + "). High spending may compromise your savings goals!";
                         mainFrame.getNotificationService().createNotification(
                                 mainFrame.getCurrentUser().getUserId(),
-                                "WARNING: Budget exceeded for category " + cat + " (Limit: ₹" + b.getLimitAmount() + ")",
+                                alertMsg,
                                 NotificationType.BUDGET_ALERT
                         );
+                        UIHelper.showWarning(this, "[CATEGORY BUDGET EXCEEDED]\nCategory: " + cat + "\nTotal Spent: ₹" + newSpent + " (Budget Limit: ₹" + budgetLimit + ")\nHigh spending will impact your savings milestones!");
+
+                    } else if (budgetLimit.compareTo(BigDecimal.ZERO) > 0 && newSpent.compareTo(budgetLimit.multiply(new BigDecimal("0.80"))) >= 0) {
+                        String alertMsg = "[BUDGET CAUTION] 80% of budget reached for " + cat + " (Spent: ₹" + newSpent + " / Limit: ₹" + budgetLimit + "). Slow down spending to protect your savings goals!";
+                        mainFrame.getNotificationService().createNotification(
+                                mainFrame.getCurrentUser().getUserId(),
+                                alertMsg,
+                                NotificationType.BUDGET_ALERT
+                        );
+                        UIHelper.showWarning(this, "[BUDGET CAUTION]\nYou have utilized 80%+ of your " + cat + " budget!\nSpent: ₹" + newSpent + " / Limit: ₹" + budgetLimit + "\nPlease slow down discretionary spending to stay on track for your savings goals.");
                     }
                 }
             }

@@ -60,6 +60,7 @@ public class MainFrame extends JFrame {
         observer.NotificationObserver notifObs = new observer.NotificationObserver(notificationService);
         observer.RewardObserver rewardObs = new observer.RewardObserver(rewardService);
         this.walletService.addObserver(notifObs);
+        this.expenseService.addObserver(notifObs);
         this.savingsGoalService.addObserver(notifObs);
         this.savingsGoalService.addObserver(rewardObs);
 

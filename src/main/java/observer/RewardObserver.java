@@ -3,7 +3,10 @@ package observer;
 import model.SavingsGoal;
 import model.Transaction;
 import model.User;
+import model.Wallet;
 import service.RewardService;
+
+import java.math.BigDecimal;
 
 public class RewardObserver implements WalletEventListener {
     private RewardService rewardService;
@@ -14,7 +17,7 @@ public class RewardObserver implements WalletEventListener {
 
     @Override
     public void onTransactionCreated(User user, Transaction transaction) {
-        // No points awarded for standard deposits/withdrawals
+        // Transactions do not directly issue milestone points
     }
 
     @Override
@@ -25,10 +28,15 @@ public class RewardObserver implements WalletEventListener {
                     user.getUserId(),
                     "Goal Achieved Reward",
                     100,
-                    "Earned 100 pts for achieving goal: " + goal.getGoalName()
+                    "Achieved savings goal: " + goal.getGoalName()
             );
         } catch (Exception ex) {
             System.err.println("RewardObserver Error: " + ex.getMessage());
         }
+    }
+
+    @Override
+    public void onSpendingLimitExceeded(User user, Wallet wallet, BigDecimal amount) {
+        // No reward points for exceeding limit
     }
 }

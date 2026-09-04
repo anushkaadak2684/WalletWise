@@ -39,6 +39,12 @@ public class WalletService {
         }
     }
 
+    private void notifySpendingLimitExceeded(User user, Wallet wallet, BigDecimal amount) {
+        for (WalletEventListener listener : observers) {
+            listener.onSpendingLimitExceeded(user, wallet, amount);
+        }
+    }
+
     // Create Wallet
     public void createWallet(Wallet wallet, int userId) {
         if (wallet == null) {
@@ -115,6 +121,10 @@ public class WalletService {
         }
 
         notifyTransactionCreated(user, transaction);
+
+        if (wallet.isLimitExceeded(amount)) {
+            notifySpendingLimitExceeded(user, wallet, amount);
+        }
     }
 
     public List<Transaction> getTransactionsByWallet(int walletId) {

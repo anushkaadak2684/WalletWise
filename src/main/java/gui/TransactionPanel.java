@@ -24,57 +24,68 @@ public class TransactionPanel extends JPanel {
 
     public TransactionPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
+        setLayout(new BorderLayout(0, 15));
         setBorder(new EmptyBorder(15, 15, 15, 15));
+
         initUI();
     }
 
     private void initUI() {
-        JPanel actionsPanel = new JPanel(new GridLayout(1, 2, 15, 0));
+        // TOP PANEL: Quick Action Cards (Deposit & Withdraw)
+        JPanel topPanel = new JPanel(new GridLayout(1, 2, 15, 0));
 
-        // Deposit Panel
-        JPanel depositCard = new JPanel(new GridBagLayout());
-        depositCard.setBorder(BorderFactory.createTitledBorder("Deposit Funds"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6); gbc.fill = GridBagConstraints.HORIZONTAL;
+        // Deposit Card
+        JPanel depositCard = UIHelper.createCardPanel("Quick Deposit");
+        JPanel depGrid = new JPanel(new GridLayout(3, 2, 10, 10));
+        depGrid.setBorder(new EmptyBorder(10, 10, 10, 10));
+        depGrid.add(new JLabel("Amount (₹):"));
+        depositAmountField = new JTextField();
+        depGrid.add(depositAmountField);
+        depGrid.add(new JLabel("Description:"));
+        depositDescField = new JTextField();
+        depGrid.add(depositDescField);
+        depGrid.add(new JLabel(""));
+        JButton depBtn = UIHelper.createBlueButton("Deposit Funds");
+        depBtn.addActionListener(e -> handleDeposit());
+        depGrid.add(depBtn);
+        depositCard.add(depGrid, BorderLayout.CENTER);
 
-        gbc.gridx = 0; gbc.gridy = 0; depositCard.add(new JLabel("Amount (₹):"), gbc);
-        gbc.gridx = 1; depositAmountField = new JTextField(12); depositCard.add(depositAmountField, gbc);
+        // Withdraw Card
+        JPanel withdrawCard = UIHelper.createCardPanel("Quick Withdrawal");
+        JPanel withGrid = new JPanel(new GridLayout(3, 2, 10, 10));
+        withGrid.setBorder(new EmptyBorder(10, 10, 10, 10));
+        withGrid.add(new JLabel("Amount (₹):"));
+        withdrawAmountField = new JTextField();
+        withGrid.add(withdrawAmountField);
+        withGrid.add(new JLabel("Description:"));
+        withdrawDescField = new JTextField();
+        withGrid.add(withdrawDescField);
+        withGrid.add(new JLabel(""));
+        JButton withBtn = new JButton("Withdraw Funds");
+        withBtn.setFont(Theme.BODY_BOLD);
+        withBtn.addActionListener(e -> handleWithdraw());
+        withGrid.add(withBtn);
+        withdrawCard.add(withGrid, BorderLayout.CENTER);
 
-        gbc.gridx = 0; gbc.gridy = 1; depositCard.add(new JLabel("Description:"), gbc);
-        gbc.gridx = 1; depositDescField = new JTextField("Salary / Deposit", 12); depositCard.add(depositDescField, gbc);
+        topPanel.add(depositCard);
+        topPanel.add(withdrawCard);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        JButton depositBtn = UIHelper.createBlueButton("Deposit Money");
-        depositBtn.addActionListener(e -> handleDeposit());
-        depositCard.add(depositBtn, gbc);
+        add(topPanel, BorderLayout.NORTH);
 
-        // Withdraw Panel
-        JPanel withdrawCard = new JPanel(new GridBagLayout());
-        withdrawCard.setBorder(BorderFactory.createTitledBorder("Withdraw Funds"));
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6); gbc.fill = GridBagConstraints.HORIZONTAL;
+        // CENTER: Transaction Table Card
+        JPanel tableCard = UIHelper.createCardPanel("Transaction Ledger");
+        String[] cols = {"ID", "Type", "Amount", "Date", "Description"};
+        tableModel = new DefaultTableModel(cols, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
 
-        gbc.gridx = 0; gbc.gridy = 0; withdrawCard.add(new JLabel("Amount (₹):"), gbc);
-        gbc.gridx = 1; withdrawAmountField = new JTextField(12); withdrawCard.add(withdrawAmountField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1; withdrawCard.add(new JLabel("Description:"), gbc);
-        gbc.gridx = 1; withdrawDescField = new JTextField("Cash / Withdrawal", 12); withdrawCard.add(withdrawDescField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        JButton withdrawBtn = UIHelper.createBlueButton("Withdraw Money");
-        withdrawBtn.addActionListener(e -> handleWithdraw());
-        withdrawCard.add(withdrawBtn, gbc);
-
-        actionsPanel.add(depositCard);
-        actionsPanel.add(withdrawCard);
-
-        add(actionsPanel, BorderLayout.NORTH);
-
-        // Table
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Type", "Amount", "Date", "Description"}, 0);
         JTable table = new JTable(tableModel);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        table.setRowHeight(28);
+        tableCard.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        add(tableCard, BorderLayout.CENTER);
     }
 
     public void refreshData() {
@@ -122,6 +133,10 @@ public class TransactionPanel extends JPanel {
             String desc = withdrawDescField.getText().trim();
 
             mainFrame.getWalletService().withdrawMoney(mainFrame.getCurrentUser(), wallet, amt, desc);
+
+            if (wallet.isLimitExceeded(amt)) {
+                UIHelper.showWarning(this, "[WITHDRAWAL LIMIT WARNING]\n" + wallet.getLimitWarningMessage() + "\nHigh withdrawals may impact your upcoming budget and savings goals.");
+            }
 
             UIHelper.showSuccess(this, "Withdrew ₹" + amt + " successfully!");
             withdrawAmountField.setText("");
