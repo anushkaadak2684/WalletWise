@@ -19,45 +19,55 @@ public class RewardPanel extends JPanel {
 
     public RewardPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Theme.BG_DARK);
+        setBorder(new EmptyBorder(16, 16, 16, 16));
         initUI();
     }
 
     private void initUI() {
-        JPanel topPanel = new JPanel(new BorderLayout(15, 15));
+        // Top Banner Card
+        JPanel topCard = UIHelper.createCardPanel("Gamified Financial Milestones & Rewards");
+        JPanel topContent = new JPanel(new BorderLayout(10, 10));
+        topContent.setOpaque(false);
 
-        JPanel badgeCard = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        badgeCard.setBorder(BorderFactory.createTitledBorder("System Rewards & Points Summary"));
-        pointsLabel = new JLabel("Total Reward Points: 0 Pts");
-        pointsLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        pointsLabel = new JLabel("Total Balance: 0 Pts");
+        pointsLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         pointsLabel.setForeground(Theme.WARNING_COLOR);
-        badgeCard.add(pointsLabel);
 
-        JPanel infoCard = new JPanel(new BorderLayout());
-        JLabel infoLabel = new JLabel("<html>Rewards are automatically granted by the system upon achieving financial milestones, setting savings goals, and maintaining healthy budgets.</html>");
+        JLabel infoLabel = new JLabel("<html>Earn <font color='#F59E0B'><b>+100 Reward Points</b></font> automatically upon reaching savings goals, maintaining positive balances, and staying within configured category budgets.</html>");
         infoLabel.setFont(Theme.BODY_FONT);
-        infoLabel.setBorder(new EmptyBorder(8, 10, 8, 10));
-        infoCard.add(infoLabel, BorderLayout.CENTER);
+        infoLabel.setForeground(Theme.TEXT_MUTED);
 
-        topPanel.add(badgeCard, BorderLayout.NORTH);
-        topPanel.add(infoCard, BorderLayout.CENTER);
+        topContent.add(pointsLabel, BorderLayout.WEST);
+        topContent.add(infoLabel, BorderLayout.EAST);
+        topCard.add(topContent, BorderLayout.CENTER);
 
-        add(topPanel, BorderLayout.NORTH);
+        add(topCard, BorderLayout.NORTH);
 
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Reward Name", "Points Earned", "System Description", "Earned Date"}, 0);
+        // Rewards Table Card
+        JPanel tableCard = UIHelper.createCardPanel("Earned Rewards & Achievements Ledger");
+        tableModel = new DefaultTableModel(new Object[]{"ID", "Achievement Name", "Points", "Description", "Earned Date"}, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         JTable table = new JTable(tableModel);
+        table.setRowHeight(32);
+        tableCard.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.add(new JScrollPane(table), BorderLayout.CENTER);
-
-        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton deleteRewardBtn = UIHelper.createBlueButton("Delete Selected Reward Record");
+        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 8));
+        bottomBtnPanel.setOpaque(false);
+        JButton deleteRewardBtn = new JButton("Delete Selected");
+        deleteRewardBtn.setFont(Theme.BODY_BOLD);
+        deleteRewardBtn.setBackground(new Color(38, 44, 54));
+        deleteRewardBtn.setForeground(Theme.TEXT_PRIMARY);
+        deleteRewardBtn.setFocusPainted(false);
         deleteRewardBtn.addActionListener(e -> handleDeleteReward(table));
         bottomBtnPanel.add(deleteRewardBtn);
 
-        centerPanel.add(bottomBtnPanel, BorderLayout.SOUTH);
-        add(centerPanel, BorderLayout.CENTER);
+        tableCard.add(bottomBtnPanel, BorderLayout.SOUTH);
+        add(tableCard, BorderLayout.CENTER);
     }
 
     public void refreshData() {
@@ -65,7 +75,7 @@ public class RewardPanel extends JPanel {
         if (user == null) return;
 
         int totalPts = mainFrame.getRewardService().getTotalPoints(user.getUserId());
-        pointsLabel.setText("Total Reward Points: " + totalPts + " Pts");
+        pointsLabel.setText("⭐ Total Rewards: " + totalPts + " Pts");
 
         List<Reward> rewards = mainFrame.getRewardService().getUserRewards(user.getUserId());
         tableModel.setRowCount(0);
@@ -73,7 +83,7 @@ public class RewardPanel extends JPanel {
             tableModel.addRow(new Object[]{
                     r.getRewardId(),
                     r.getRewardName(),
-                    r.getPoints(),
+                    "+" + r.getPoints() + " Pts",
                     r.getDescription(),
                     r.getEarnedDate().toString()
             });

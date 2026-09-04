@@ -27,51 +27,89 @@ public class BudgetPanel extends JPanel {
 
     public BudgetPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Theme.BG_DARK);
+        setBorder(new EmptyBorder(16, 16, 16, 16));
         initUI();
     }
 
     private void initUI() {
         // Form Panel
-        JPanel formCard = new JPanel(new GridBagLayout());
-        formCard.setBorder(BorderFactory.createTitledBorder("Set Category Budget"));
+        JPanel formCard = UIHelper.createCardPanel("Set Category Budget");
+        JPanel formGrid = new JPanel(new GridBagLayout());
+        formGrid.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6); gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(6, 10, 6, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; formCard.add(new JLabel("Category:"), gbc);
-        gbc.gridx = 1; categoryCombo = new JComboBox<>(ExpenseCategory.values()); formCard.add(categoryCombo, gbc);
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel catLbl = new JLabel("Category:");
+        catLbl.setForeground(Theme.TEXT_MUTED);
+        formGrid.add(catLbl, gbc);
 
-        gbc.gridx = 2; formCard.add(new JLabel("Limit Amount (₹):"), gbc);
-        gbc.gridx = 3; limitField = new JTextField(12); formCard.add(limitField, gbc);
+        gbc.gridx = 1;
+        categoryCombo = new JComboBox<>(ExpenseCategory.values());
+        formGrid.add(categoryCombo, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; formCard.add(new JLabel("Start Date:"), gbc);
-        gbc.gridx = 1; startDateField = new JTextField(LocalDate.now().toString(), 12); formCard.add(startDateField, gbc);
+        gbc.gridx = 2;
+        JLabel limLbl = new JLabel("Limit Amount (₹):");
+        limLbl.setForeground(Theme.TEXT_MUTED);
+        formGrid.add(limLbl, gbc);
 
-        gbc.gridx = 2; formCard.add(new JLabel("End Date:"), gbc);
-        gbc.gridx = 3; endDateField = new JTextField(LocalDate.now().plusMonths(1).toString(), 12); formCard.add(endDateField, gbc);
+        gbc.gridx = 3;
+        limitField = new JTextField(12);
+        formGrid.add(limitField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        JLabel startLbl = new JLabel("Start Date:");
+        startLbl.setForeground(Theme.TEXT_MUTED);
+        formGrid.add(startLbl, gbc);
+
+        gbc.gridx = 1;
+        startDateField = new JTextField(LocalDate.now().toString(), 12);
+        formGrid.add(startDateField, gbc);
+
+        gbc.gridx = 2;
+        JLabel endLbl = new JLabel("End Date:");
+        endLbl.setForeground(Theme.TEXT_MUTED);
+        formGrid.add(endLbl, gbc);
+
+        gbc.gridx = 3;
+        endDateField = new JTextField(LocalDate.now().plusMonths(1).toString(), 12);
+        formGrid.add(endDateField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 4;
-        JButton addBudgetBtn = UIHelper.createBlueButton("Create Budget");
+        gbc.insets = new Insets(12, 10, 6, 10);
+        JButton addBudgetBtn = UIHelper.createBlueButton("Create Category Budget");
         addBudgetBtn.addActionListener(e -> handleCreateBudget());
-        formCard.add(addBudgetBtn, gbc);
+        formGrid.add(addBudgetBtn, gbc);
 
+        formCard.add(formGrid, BorderLayout.CENTER);
         add(formCard, BorderLayout.NORTH);
 
-        // Table
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Category", "Limit", "Spent", "Usage %", "Status", "Start Date", "End Date"}, 0);
+        // Table Card
+        JPanel tableCard = UIHelper.createCardPanel("Category Budgets & Progress");
+        tableModel = new DefaultTableModel(new Object[]{"ID", "Category", "Limit", "Spent", "Usage %", "Status", "Start Date", "End Date"}, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         JTable table = new JTable(tableModel);
+        table.setRowHeight(32);
+        tableCard.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.add(new JScrollPane(table), BorderLayout.CENTER);
-
-        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton deleteBudgetBtn = UIHelper.createBlueButton("Delete Selected Budget");
+        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 8));
+        bottomBtnPanel.setOpaque(false);
+        JButton deleteBudgetBtn = new JButton("Delete Selected");
+        deleteBudgetBtn.setFont(Theme.BODY_BOLD);
+        deleteBudgetBtn.setBackground(new Color(38, 44, 54));
+        deleteBudgetBtn.setForeground(Theme.TEXT_PRIMARY);
+        deleteBudgetBtn.setFocusPainted(false);
         deleteBudgetBtn.addActionListener(e -> handleDeleteBudget(table));
         bottomBtnPanel.add(deleteBudgetBtn);
 
-        centerPanel.add(bottomBtnPanel, BorderLayout.SOUTH);
-        add(centerPanel, BorderLayout.CENTER);
+        tableCard.add(bottomBtnPanel, BorderLayout.SOUTH);
+        add(tableCard, BorderLayout.CENTER);
     }
 
     public void refreshData() {

@@ -32,83 +32,98 @@ public class WalletPanel extends JPanel {
 
     public WalletPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Theme.BG_DARK);
+        setBorder(new EmptyBorder(16, 16, 16, 16));
         initUI();
     }
 
     private void initUI() {
+        JPanel topGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        topGrid.setOpaque(false);
+
         // Wallet Specifications Header Card
-        JPanel infoCard = new JPanel(new GridBagLayout());
-        infoCard.setBorder(BorderFactory.createTitledBorder("Wallet Specifications & Limits"));
+        JPanel infoCard = UIHelper.createCardPanel("Wallet Specifications & Limits");
+        JPanel infoGrid = new JPanel(new GridBagLayout());
+        infoGrid.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 12, 8, 12);
+        gbc.insets = new Insets(6, 10, 6, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        infoCard.add(new JLabel("Wallet ID:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel wIdLbl = new JLabel("Wallet ID:");
+        wIdLbl.setForeground(Theme.TEXT_MUTED);
+        infoGrid.add(wIdLbl, gbc);
         gbc.gridx = 1;
         walletIdValLabel = new JLabel("-");
         walletIdValLabel.setFont(Theme.BODY_BOLD);
-        infoCard.add(walletIdValLabel, gbc);
+        walletIdValLabel.setForeground(Theme.TEXT_PRIMARY);
+        infoGrid.add(walletIdValLabel, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        infoCard.add(new JLabel("Wallet Type:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 1;
+        JLabel wTypeLbl = new JLabel("Wallet Type:");
+        wTypeLbl.setForeground(Theme.TEXT_MUTED);
+        infoGrid.add(wTypeLbl, gbc);
         gbc.gridx = 1;
         walletTypeValLabel = new JLabel("-");
         walletTypeValLabel.setFont(Theme.BODY_BOLD);
-        infoCard.add(walletTypeValLabel, gbc);
+        walletTypeValLabel.setForeground(Theme.CYAN_ACCENT);
+        infoGrid.add(walletTypeValLabel, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        infoCard.add(new JLabel("Current Balance:"), gbc);
+        gbc.gridx = 0; gbc.gridy = 2;
+        JLabel cBalLbl = new JLabel("Current Balance:");
+        cBalLbl.setForeground(Theme.TEXT_MUTED);
+        infoGrid.add(cBalLbl, gbc);
         gbc.gridx = 1;
         balanceValLabel = new JLabel("-");
-        balanceValLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+        balanceValLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         balanceValLabel.setForeground(Theme.SUCCESS_COLOR);
-        infoCard.add(balanceValLabel, gbc);
+        infoGrid.add(balanceValLabel, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 3;
         limitTitleLabel = new JLabel("Configured Limit:");
-        infoCard.add(limitTitleLabel, gbc);
+        limitTitleLabel.setForeground(Theme.TEXT_MUTED);
+        infoGrid.add(limitTitleLabel, gbc);
         gbc.gridx = 1;
         limitValLabel = new JLabel("-");
         limitValLabel.setFont(Theme.BODY_BOLD);
-        infoCard.add(limitValLabel, gbc);
+        limitValLabel.setForeground(Theme.TEXT_PRIMARY);
+        infoGrid.add(limitValLabel, gbc);
 
-        // Update Limit Form
-        JPanel updateCard = new JPanel(new GridBagLayout());
-        updateCard.setBorder(BorderFactory.createTitledBorder("Modify Configured Limit"));
+        infoCard.add(infoGrid, BorderLayout.CENTER);
+
+        // Update Limit Form Card
+        JPanel updateCard = UIHelper.createCardPanel("Modify Spending Limit");
+        JPanel updateGrid = new JPanel(new GridBagLayout());
+        updateGrid.setOpaque(false);
         gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 12, 8, 12);
+        gbc.insets = new Insets(8, 10, 8, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        updateCard.add(new JLabel("New Limit (₹):"), gbc);
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel nLimitLbl = new JLabel("New Limit (₹):");
+        nLimitLbl.setForeground(Theme.TEXT_MUTED);
+        updateGrid.add(nLimitLbl, gbc);
         gbc.gridx = 1;
         newLimitField = new JTextField(12);
-        updateCard.add(newLimitField, gbc);
+        updateGrid.add(newLimitField, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridx = 0; gbc.gridy = 1;
         gbc.gridwidth = 2;
         JButton updateLimitBtn = UIHelper.createBlueButton("Update Limit");
-        updateLimitBtn.setPreferredSize(new Dimension(160, 36));
         updateLimitBtn.addActionListener(e -> handleUpdateLimit());
-        updateCard.add(updateLimitBtn, gbc);
+        updateGrid.add(updateLimitBtn, gbc);
 
-        JPanel topGrid = new JPanel(new GridLayout(1, 2, 15, 0));
+        updateCard.add(updateGrid, BorderLayout.CENTER);
+
         topGrid.add(infoCard);
         topGrid.add(updateCard);
 
         add(topGrid, BorderLayout.NORTH);
 
         // Visual Graphs & Pie Chart Section
-        JPanel chartsContainer = new JPanel(new GridLayout(1, 2, 15, 0));
+        JPanel chartsContainer = new JPanel(new GridLayout(1, 2, 16, 0));
+        chartsContainer.setOpaque(false);
 
         pieChartPanel = new PieChartPanel();
         limitProgressPanel = new LimitProgressPanel();
@@ -121,8 +136,7 @@ public class WalletPanel extends JPanel {
 
     public void refreshData() {
         Wallet wallet = mainFrame.getCurrentWallet();
-        if (wallet == null)
-            return;
+        if (wallet == null) return;
 
         walletIdValLabel.setText(String.valueOf(wallet.getWalletId()));
         walletTypeValLabel.setText(wallet.getWalletType().name());
@@ -149,8 +163,7 @@ public class WalletPanel extends JPanel {
 
     private void handleUpdateLimit() {
         Wallet wallet = mainFrame.getCurrentWallet();
-        if (wallet == null)
-            return;
+        if (wallet == null) return;
 
         try {
             BigDecimal newLimit = new BigDecimal(newLimitField.getText().trim());
@@ -181,17 +194,25 @@ public class WalletPanel extends JPanel {
 
         private Map<ExpenseCategory, BigDecimal> categoryData = new HashMap<>();
         private static final Color[] COLORS = {
-                new Color(52, 152, 219), new Color(46, 204, 113), new Color(231, 76, 60),
-                new Color(241, 196, 15), new Color(155, 89, 182), new Color(230, 126, 34), new Color(149, 165, 166)
+                new Color(99, 102, 241),  // Indigo
+                new Color(56, 189, 248),  // Cyan
+                new Color(16, 185, 129),  // Emerald
+                new Color(245, 158, 11),  // Amber
+                new Color(239, 68, 68),   // Rose
+                new Color(168, 85, 247),  // Purple
+                new Color(236, 72, 153)   // Pink
         };
 
         public PieChartPanel() {
-            setBorder(BorderFactory.createTitledBorder("Expense Category Breakdown (Pie Chart)"));
             setBackground(Theme.CARD_BG);
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Theme.CARD_BORDER, 1),
+                    new EmptyBorder(16, 18, 16, 18)
+            ));
         }
 
         public void setData(Map<ExpenseCategory, BigDecimal> data) {
-            this.categoryData = data;
+            this.categoryData = data != null ? data : new HashMap<>();
             repaint();
         }
 
@@ -204,10 +225,14 @@ public class WalletPanel extends JPanel {
             int width = getWidth();
             int height = getHeight();
 
+            g2d.setColor(Theme.TEXT_PRIMARY);
+            g2d.setFont(Theme.HEADER_FONT);
+            g2d.drawString("Expense Breakdown by Category", 16, 26);
+
             if (categoryData == null || categoryData.isEmpty()) {
-                g2d.setColor(Color.GRAY);
+                g2d.setColor(Theme.TEXT_MUTED);
                 g2d.setFont(Theme.BODY_FONT);
-                g2d.drawString("No expense data recorded yet to render Pie Chart.", width / 4, height / 2);
+                g2d.drawString("No expense data recorded yet.", width / 3, height / 2);
                 g2d.dispose();
                 return;
             }
@@ -218,21 +243,21 @@ public class WalletPanel extends JPanel {
             }
 
             if (total == 0) {
-                g2d.setColor(Color.GRAY);
+                g2d.setColor(Theme.TEXT_MUTED);
                 g2d.drawString("Total expenses: ₹0.00", width / 3, height / 2);
                 g2d.dispose();
                 return;
             }
 
-            int size = Math.min(width / 2, height - 60);
+            int size = Math.min(width / 2, height - 70);
             int x = 20;
-            int y = (height - size) / 2;
+            int y = 50 + (height - 50 - size) / 2;
 
             int startAngle = 0;
             int colorIdx = 0;
 
-            int legendX = x + size + 20;
-            int legendY = y + 10;
+            int legendX = x + size + 24;
+            int legendY = 60;
 
             for (Map.Entry<ExpenseCategory, BigDecimal> entry : categoryData.entrySet()) {
                 double val = entry.getValue().doubleValue();
@@ -243,14 +268,13 @@ public class WalletPanel extends JPanel {
                 g2d.fillArc(x, y, size, size, startAngle, angle);
 
                 // Draw Legend
-                g2d.fillRect(legendX, legendY, 12, 12);
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("SansSerif", Font.PLAIN, 12));
+                g2d.fillRoundRect(legendX, legendY, 12, 12, 4, 4);
+                g2d.setColor(Theme.TEXT_PRIMARY);
+                g2d.setFont(Theme.BODY_FONT);
                 double pct = (val / total) * 100;
-                g2d.drawString(String.format("%s: ₹%.2f (%.1f%%)", entry.getKey().name(), val, pct), legendX + 18,
-                        legendY + 11);
+                g2d.drawString(String.format("%s: ₹%.2f (%.1f%%)", entry.getKey().name(), val, pct), legendX + 20, legendY + 11);
 
-                legendY += 22;
+                legendY += 24;
                 startAngle += angle;
                 colorIdx++;
             }
@@ -267,8 +291,11 @@ public class WalletPanel extends JPanel {
         private BigDecimal limitVal = BigDecimal.ZERO;
 
         public LimitProgressPanel() {
-            setBorder(BorderFactory.createTitledBorder("Limit Utilization & Status Gauge"));
             setBackground(Theme.CARD_BG);
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Theme.CARD_BORDER, 1),
+                    new EmptyBorder(16, 18, 16, 18)
+            ));
         }
 
         public void setData(BigDecimal spent, BigDecimal limit) {
@@ -285,43 +312,45 @@ public class WalletPanel extends JPanel {
 
             int width = getWidth();
 
-            g2d.setColor(Color.WHITE);
+            g2d.setColor(Theme.TEXT_PRIMARY);
             g2d.setFont(Theme.HEADER_FONT);
-            g2d.drawString("Wallet Utilization Metrics", 20, 35);
+            g2d.drawString("Spending Limit & Utilization Status", 16, 26);
 
             double spent = totalSpent.doubleValue();
             double limit = limitVal.doubleValue();
             double pct = limit > 0 ? (spent / limit) * 100 : 0;
 
             // Bar background
-            int barX = 20;
-            int barY = 60;
-            int barW = width - 40;
-            int barH = 28;
+            int barX = 16;
+            int barY = 65;
+            int barW = width - 32;
+            int barH = 32;
 
-            g2d.setColor(new Color(50, 50, 50));
-            g2d.fillRoundRect(barX, barY, barW, barH, 10, 10);
+            g2d.setColor(new Color(30, 36, 46));
+            g2d.fillRoundRect(barX, barY, barW, barH, 12, 12);
 
             // Fill Bar
             int fillW = limit > 0 ? (int) Math.min(barW, (spent / limit) * barW) : 0;
-            Color barColor = pct >= 100 ? Theme.DANGER_COLOR : (pct >= 75 ? Theme.WARNING_COLOR : Theme.SUCCESS_COLOR);
+            Color barColor = pct >= 100 ? Theme.DANGER_COLOR : (pct >= 80 ? Theme.WARNING_COLOR : Theme.SUCCESS_COLOR);
             g2d.setColor(barColor);
-            g2d.fillRoundRect(barX, barY, fillW, barH, 10, 10);
+            g2d.fillRoundRect(barX, barY, fillW, barH, 12, 12);
 
             // Label text over bar
             g2d.setColor(Color.WHITE);
             g2d.setFont(Theme.BODY_BOLD);
-            g2d.drawString(String.format("Spent: ₹%.2f / Limit: ₹%.2f (%.1f%%)", spent, limit, pct), barX + 15,
-                    barY + 19);
+            g2d.drawString(String.format("Spent: ₹%.2f / Limit: ₹%.2f (%.1f%%)", spent, limit, pct), barX + 16, barY + 21);
 
-            // Status Indicator
-            g2d.setFont(new Font("SansSerif", Font.BOLD, 14));
+            // Status Indicator Badge
+            g2d.setFont(new Font("Segoe UI", Font.BOLD, 14));
             if (pct >= 100) {
                 g2d.setColor(Theme.DANGER_COLOR);
-                g2d.drawString("STATUS: LIMIT EXCEEDED", 20, 120);
+                g2d.drawString("● STATUS: LIMIT EXCEEDED", 16, 135);
+            } else if (pct >= 80) {
+                g2d.setColor(Theme.WARNING_COLOR);
+                g2d.drawString("● STATUS: NEAR LIMIT (80%+ USED)", 16, 135);
             } else {
                 g2d.setColor(Theme.SUCCESS_COLOR);
-                g2d.drawString("STATUS: SAFE (WITHIN CONFIGURED LIMIT)", 20, 120);
+                g2d.drawString("● STATUS: SAFE (WITHIN CONFIGURED LIMIT)", 16, 135);
             }
 
             g2d.dispose();

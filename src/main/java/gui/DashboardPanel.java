@@ -28,44 +28,54 @@ public class DashboardPanel extends JPanel {
 
     public DashboardPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Theme.BG_DARK);
+        setBorder(new EmptyBorder(16, 16, 16, 16));
         initUI();
     }
 
     private void initUI() {
         // Metric Cards Panel
-        JPanel metricsPanel = new JPanel(new GridLayout(1, 4, 15, 0));
+        JPanel metricsPanel = new JPanel(new GridLayout(1, 4, 16, 0));
+        metricsPanel.setOpaque(false);
 
-        ovBalanceLabel = UIHelper.createMetricCard(metricsPanel, "Current Balance", "₹0.00", Theme.SUCCESS_COLOR);
+        ovBalanceLabel = UIHelper.createMetricCard(metricsPanel, "Available Balance", "₹0.00", Theme.SUCCESS_COLOR);
         ovExpenseLabel = UIHelper.createMetricCard(metricsPanel, "Total Expenses", "₹0.00", Theme.DANGER_COLOR);
         ovPointsLabel = UIHelper.createMetricCard(metricsPanel, "Reward Points", "0 Pts", Theme.WARNING_COLOR);
-        ovNotificationsLabel = UIHelper.createMetricCard(metricsPanel, "Unread Alerts", "0 New", Theme.PRIMARY_ACCENT);
+        ovNotificationsLabel = UIHelper.createMetricCard(metricsPanel, "Unread Alerts", "0 New", Theme.CYAN_ACCENT);
 
         add(metricsPanel, BorderLayout.NORTH);
 
-        // Sub Tables Split
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        splitPane.setResizeWeight(0.5);
+        // Sub Tables Grid
+        JPanel tablesGrid = new JPanel(new GridLayout(1, 2, 16, 0));
+        tablesGrid.setOpaque(false);
 
-        // Recent Transactions
-        JPanel transPanel = new JPanel(new BorderLayout());
-        transPanel.setBorder(BorderFactory.createTitledBorder("Recent Transactions"));
-        ovTransTableModel = new DefaultTableModel(new Object[]{"Type", "Amount", "Date", "Description"}, 0);
+        // Recent Transactions Card
+        JPanel transCard = UIHelper.createCardPanel("Recent Transactions");
+        ovTransTableModel = new DefaultTableModel(new Object[]{"Type", "Amount", "Date", "Description"}, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         JTable ovTransTable = new JTable(ovTransTableModel);
-        transPanel.add(new JScrollPane(ovTransTable), BorderLayout.CENTER);
+        ovTransTable.setRowHeight(32);
+        transCard.add(new JScrollPane(ovTransTable), BorderLayout.CENTER);
 
-        // Active Budgets
-        JPanel budgetPanel = new JPanel(new BorderLayout());
-        budgetPanel.setBorder(BorderFactory.createTitledBorder("Budget Usage Summary"));
-        ovBudgetsTableModel = new DefaultTableModel(new Object[]{"Category", "Spent", "Limit", "Usage %", "Status"}, 0);
+        // Active Budgets Card
+        JPanel budgetCard = UIHelper.createCardPanel("Budget Usage Summary");
+        ovBudgetsTableModel = new DefaultTableModel(new Object[]{"Category", "Spent", "Limit", "Usage %", "Status"}, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         JTable ovBudgetTable = new JTable(ovBudgetsTableModel);
-        budgetPanel.add(new JScrollPane(ovBudgetTable), BorderLayout.CENTER);
+        ovBudgetTable.setRowHeight(32);
+        budgetCard.add(new JScrollPane(ovBudgetTable), BorderLayout.CENTER);
 
-        splitPane.setLeftComponent(transPanel);
-        splitPane.setRightComponent(budgetPanel);
+        tablesGrid.add(transCard);
+        tablesGrid.add(budgetCard);
 
-        add(splitPane, BorderLayout.CENTER);
+        add(tablesGrid, BorderLayout.CENTER);
     }
 
     public void refreshData() {

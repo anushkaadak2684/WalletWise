@@ -22,11 +22,12 @@ public class LoginRegisterFrame extends JFrame {
     private ReportService reportService;
 
     public LoginRegisterFrame() {
-        setTitle("Digital Wallet - Authentication");
+        setTitle("WalletWise — Authentication");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(550, 680);
-        setMinimumSize(new Dimension(480, 580));
+        setSize(560, 700);
+        setMinimumSize(new Dimension(500, 620));
         setLocationRelativeTo(null);
+        getContentPane().setBackground(Theme.BG_DARK);
 
         initBackendServices();
         initUI();
@@ -54,23 +55,34 @@ public class LoginRegisterFrame extends JFrame {
     }
 
     private void initUI() {
-        JPanel mainPanel = new JPanel(new BorderLayout(0, 15));
-        mainPanel.setBorder(new EmptyBorder(25, 30, 25, 30));
+        JPanel mainPanel = new JPanel(new BorderLayout(0, 16));
+        mainPanel.setBackground(Theme.BG_DARK);
+        mainPanel.setBorder(new EmptyBorder(30, 36, 30, 36));
 
         // Header Title
-        JPanel titlePanel = new JPanel(new GridLayout(2, 1, 0, 6));
-        titlePanel.setBorder(new EmptyBorder(10, 10, 25, 10));
+        JPanel titlePanel = new JPanel(new GridLayout(2, 1, 0, 8));
+        titlePanel.setOpaque(false);
+        titlePanel.setBorder(new EmptyBorder(8, 8, 20, 8));
 
-        JLabel titleLabel = new JLabel("DIGITAL WALLET & FINANCE TRACKER", SwingConstants.CENTER);
-        titleLabel.setFont(Theme.TITLE_FONT);
+        JLabel titleLabel = new JLabel("WALLETWISE", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 26));
+        titleLabel.setForeground(Theme.PRIMARY_ACCENT);
 
-        JLabel subLabel = new JLabel("Secure Authentication & Management", SwingConstants.CENTER);
+        JLabel subLabel = new JLabel("Personal Finance & Digital Wallet Tracker", SwingConstants.CENTER);
         subLabel.setFont(Theme.BODY_FONT);
-        subLabel.setForeground(Color.GRAY);
+        subLabel.setForeground(Theme.TEXT_MUTED);
 
         titlePanel.add(titleLabel);
         titlePanel.add(subLabel);
         mainPanel.add(titlePanel, BorderLayout.NORTH);
+
+        // Card Container for Tabs
+        JPanel cardContainer = new JPanel(new BorderLayout());
+        cardContainer.setBackground(Theme.CARD_BG);
+        cardContainer.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.CARD_BORDER, 1),
+                new EmptyBorder(12, 12, 12, 12)
+        ));
 
         // Tabs
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -79,10 +91,12 @@ public class LoginRegisterFrame extends JFrame {
         LoginPanel loginPanel = new LoginPanel(this);
         RegisterPanel registerPanel = new RegisterPanel(this);
 
-        tabbedPane.addTab("Login", loginPanel);
-        tabbedPane.addTab("Register", registerPanel);
+        tabbedPane.addTab("Sign In", loginPanel);
+        tabbedPane.addTab("Create Account", registerPanel);
 
-        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        cardContainer.add(tabbedPane, BorderLayout.CENTER);
+        mainPanel.add(cardContainer, BorderLayout.CENTER);
+
         add(mainPanel);
     }
 

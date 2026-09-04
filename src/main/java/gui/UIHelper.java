@@ -20,7 +20,8 @@ public class UIHelper {
         button.setFont(Theme.BODY_BOLD);
         button.setFocusPainted(false);
         button.setOpaque(true);
-        button.setBorderPainted(false);
+        button.setBorder(new EmptyBorder(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return button;
     }
 
@@ -37,26 +38,37 @@ public class UIHelper {
     }
 
     public static JPanel createCardPanel(String title) {
-        JPanel card = new JPanel(new BorderLayout());
+        JPanel card = new JPanel(new BorderLayout(0, 10));
+        card.setBackground(Theme.CARD_BG);
         card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder(title),
-                new EmptyBorder(10, 10, 10, 10)));
+                BorderFactory.createLineBorder(Theme.CARD_BORDER, 1),
+                new EmptyBorder(14, 16, 14, 16)
+        ));
+
+        if (title != null && !title.trim().isEmpty()) {
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setFont(Theme.HEADER_FONT);
+            titleLabel.setForeground(Theme.TEXT_PRIMARY);
+            titleLabel.setBorder(new EmptyBorder(0, 0, 8, 0));
+            card.add(titleLabel, BorderLayout.NORTH);
+        }
         return card;
     }
 
     public static JLabel createMetricCard(JPanel container, String title, String initialVal, Color accentColor) {
-        JPanel card = new JPanel(new BorderLayout(5, 5));
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(60, 60, 60), 1),
-                new EmptyBorder(12, 12, 12, 12)));
+        JPanel card = new JPanel(new BorderLayout(6, 6));
         card.setBackground(Theme.CARD_BG);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Theme.CARD_BORDER, 1),
+                new EmptyBorder(14, 16, 14, 16)
+        ));
 
         JLabel titleLbl = new JLabel(title);
-        titleLbl.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        titleLbl.setForeground(Color.LIGHT_GRAY);
+        titleLbl.setFont(Theme.BODY_FONT);
+        titleLbl.setForeground(Theme.TEXT_MUTED);
 
         JLabel valLbl = new JLabel(initialVal);
-        valLbl.setFont(new Font("SansSerif", Font.BOLD, 20));
+        valLbl.setFont(Theme.METRIC_VAL_FONT);
         valLbl.setForeground(accentColor);
 
         card.add(titleLbl, BorderLayout.NORTH);
@@ -73,20 +85,20 @@ public class UIHelper {
 
         JPanel rootContainer = new JPanel(new BorderLayout());
         rootContainer.setBackground(Theme.BG_DARK);
-        rootContainer.setBorder(BorderFactory.createLineBorder(new Color(60, 60, 60), 1));
+        rootContainer.setBorder(BorderFactory.createLineBorder(Theme.CARD_BORDER, 1));
 
         // Header Panel
         JPanel headerPanel = new JPanel(new BorderLayout(5, 5));
-        headerPanel.setBackground(Theme.CARD_BG);
+        headerPanel.setBackground(Theme.HEADER_BG);
         headerPanel.setBorder(new EmptyBorder(18, 24, 18, 24));
 
         JLabel titleLabel = new JLabel("Create Initial Wallet");
         titleLabel.setFont(Theme.TITLE_FONT);
-        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setForeground(Theme.TEXT_PRIMARY);
 
         JLabel subLabel = new JLabel("Configure your initial balance & spending limit for " + user.getFullName());
         subLabel.setFont(Theme.BODY_FONT);
-        subLabel.setForeground(Color.LIGHT_GRAY);
+        subLabel.setForeground(Theme.TEXT_MUTED);
 
         headerPanel.add(titleLabel, BorderLayout.NORTH);
         headerPanel.add(subLabel, BorderLayout.SOUTH);
@@ -101,7 +113,7 @@ public class UIHelper {
 
         JLabel typeLbl = new JLabel("Wallet Type:");
         typeLbl.setFont(Theme.BODY_BOLD);
-        typeLbl.setForeground(Color.WHITE);
+        typeLbl.setForeground(Theme.TEXT_PRIMARY);
 
         JComboBox<WalletType> typeCombo = new JComboBox<>(WalletType.values());
         typeCombo.setFont(Theme.BODY_FONT);
@@ -109,7 +121,7 @@ public class UIHelper {
 
         JLabel balLbl = new JLabel("Initial Balance (₹):");
         balLbl.setFont(Theme.BODY_BOLD);
-        balLbl.setForeground(Color.WHITE);
+        balLbl.setForeground(Theme.TEXT_PRIMARY);
 
         JTextField balanceField = new JTextField("0.00");
         balanceField.setFont(Theme.BODY_FONT);
@@ -117,7 +129,7 @@ public class UIHelper {
 
         JLabel limitLbl = new JLabel("Spending Limit (₹):");
         limitLbl.setFont(Theme.BODY_BOLD);
-        limitLbl.setForeground(Color.WHITE);
+        limitLbl.setForeground(Theme.TEXT_PRIMARY);
 
         JTextField limitField = new JTextField("50000.00");
         limitField.setFont(Theme.BODY_FONT);

@@ -18,34 +18,45 @@ public class LoginPanel extends JPanel {
     public LoginPanel(LoginRegisterFrame parentFrame) {
         this.parentFrame = parentFrame;
         setLayout(new GridBagLayout());
-        setBorder(new EmptyBorder(25, 25, 25, 25));
+        setBackground(Theme.CARD_BG);
+        setBorder(new EmptyBorder(25, 20, 25, 20));
         initUI();
     }
 
     private void initUI() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(14, 12, 14, 12);
+        gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Email
         gbc.gridx = 0; gbc.gridy = 0;
-        add(new JLabel("Email Address:"), gbc);
+        JLabel emailLbl = new JLabel("Email Address:");
+        emailLbl.setForeground(Theme.TEXT_MUTED);
+        emailLbl.setFont(Theme.BODY_BOLD);
+        add(emailLbl, gbc);
+
         gbc.gridx = 1;
-        emailField = new JTextField(20);
+        emailField = new JTextField(18);
+        emailField.setPreferredSize(new Dimension(220, 36));
         add(emailField, gbc);
 
         // Password
         gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Password:"), gbc);
+        JLabel passLbl = new JLabel("Password:");
+        passLbl.setForeground(Theme.TEXT_MUTED);
+        passLbl.setFont(Theme.BODY_BOLD);
+        add(passLbl, gbc);
+
         gbc.gridx = 1;
-        passwordField = new JPasswordField(20);
+        passwordField = new JPasswordField(18);
+        passwordField.setPreferredSize(new Dimension(220, 36));
         add(passwordField, gbc);
 
         // Login Button
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
-        gbc.insets = new Insets(24, 12, 14, 12);
-        JButton loginBtn = UIHelper.createBlueButton("Login to Dashboard");
-        loginBtn.setPreferredSize(new Dimension(200, 42));
+        gbc.insets = new Insets(24, 10, 10, 10);
+        JButton loginBtn = UIHelper.createBlueButton("Sign In to Account");
+        loginBtn.setPreferredSize(new Dimension(220, 42));
         loginBtn.addActionListener(e -> handleLogin());
         add(loginBtn, gbc);
     }

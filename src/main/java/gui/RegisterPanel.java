@@ -20,47 +20,68 @@ public class RegisterPanel extends JPanel {
     public RegisterPanel(LoginRegisterFrame parentFrame) {
         this.parentFrame = parentFrame;
         setLayout(new GridBagLayout());
-        setBorder(new EmptyBorder(25, 25, 25, 25));
+        setBackground(Theme.CARD_BG);
+        setBorder(new EmptyBorder(25, 20, 25, 20));
         initUI();
     }
 
     private void initUI() {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.insets = new Insets(8, 10, 8, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Full Name
         gbc.gridx = 0; gbc.gridy = 0;
-        add(new JLabel("Full Name:"), gbc);
+        JLabel nameLbl = new JLabel("Full Name:");
+        nameLbl.setForeground(Theme.TEXT_MUTED);
+        nameLbl.setFont(Theme.BODY_BOLD);
+        add(nameLbl, gbc);
+
         gbc.gridx = 1;
-        nameField = new JTextField(20);
+        nameField = new JTextField(18);
+        nameField.setPreferredSize(new Dimension(220, 36));
         add(nameField, gbc);
 
         // Email
         gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Email Address:"), gbc);
+        JLabel emailLbl = new JLabel("Email Address:");
+        emailLbl.setForeground(Theme.TEXT_MUTED);
+        emailLbl.setFont(Theme.BODY_BOLD);
+        add(emailLbl, gbc);
+
         gbc.gridx = 1;
-        emailField = new JTextField(20);
+        emailField = new JTextField(18);
+        emailField.setPreferredSize(new Dimension(220, 36));
         add(emailField, gbc);
 
         // Password
         gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Password:"), gbc);
+        JLabel passLbl = new JLabel("Password:");
+        passLbl.setForeground(Theme.TEXT_MUTED);
+        passLbl.setFont(Theme.BODY_BOLD);
+        add(passLbl, gbc);
+
         gbc.gridx = 1;
-        passwordField = new JPasswordField(20);
+        passwordField = new JPasswordField(18);
+        passwordField.setPreferredSize(new Dimension(220, 36));
         add(passwordField, gbc);
 
         // Phone
         gbc.gridx = 0; gbc.gridy = 3;
-        add(new JLabel("Phone Number:"), gbc);
+        JLabel phoneLbl = new JLabel("Phone Number:");
+        phoneLbl.setForeground(Theme.TEXT_MUTED);
+        phoneLbl.setFont(Theme.BODY_BOLD);
+        add(phoneLbl, gbc);
+
         gbc.gridx = 1;
-        phoneField = new JTextField(20);
+        phoneField = new JTextField(18);
+        phoneField.setPreferredSize(new Dimension(220, 36));
         add(phoneField, gbc);
 
         // Register Button
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 10, 10, 10);
-        JButton regBtn = UIHelper.createBlueButton("Register & Set Up Wallet");
+        gbc.insets = new Insets(20, 10, 8, 10);
+        JButton regBtn = UIHelper.createBlueButton("Register & Configure Wallet");
         regBtn.setPreferredSize(new Dimension(220, 42));
         regBtn.addActionListener(e -> handleRegister());
         add(regBtn, gbc);
@@ -86,7 +107,7 @@ public class RegisterPanel extends JPanel {
 
             User user = parentFrame.getUserService().createUser(name, email, password, phone, null);
 
-            UIHelper.showSuccess(this, "Registration successful! Please set up your wallet.");
+            UIHelper.showSuccess(this, "Registration successful! Please configure your initial wallet.");
 
             Wallet wallet = UIHelper.promptCreateWallet(this, parentFrame, user);
 

@@ -25,53 +25,85 @@ public class SavingsPanel extends JPanel {
 
     public SavingsPanel(MainFrame mainFrame) {
         this.mainFrame = mainFrame;
-        setLayout(new BorderLayout(15, 15));
-        setBorder(new EmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(0, 18));
+        setBackground(Theme.BG_DARK);
+        setBorder(new EmptyBorder(16, 16, 16, 16));
         initUI();
     }
 
     private void initUI() {
         // Create Goal Card
-        JPanel goalCard = new JPanel(new GridBagLayout());
-        goalCard.setBorder(BorderFactory.createTitledBorder("Define New Savings Goal"));
+        JPanel goalCard = UIHelper.createCardPanel("Define New Savings Goal");
+        JPanel goalGrid = new JPanel(new GridBagLayout());
+        goalGrid.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8); gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(6, 10, 6, 10);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        gbc.gridx = 0; gbc.gridy = 0; goalCard.add(new JLabel("Goal Name:"), gbc);
-        gbc.gridx = 1; nameField = new JTextField(15); goalCard.add(nameField, gbc);
+        gbc.gridx = 0; gbc.gridy = 0;
+        JLabel nameLbl = new JLabel("Goal Name:");
+        nameLbl.setForeground(Theme.TEXT_MUTED);
+        goalGrid.add(nameLbl, gbc);
 
-        gbc.gridx = 2; goalCard.add(new JLabel("Target Amount (₹):"), gbc);
-        gbc.gridx = 3; targetField = new JTextField(15); goalCard.add(targetField, gbc);
+        gbc.gridx = 1;
+        nameField = new JTextField(15);
+        goalGrid.add(nameField, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1; goalCard.add(new JLabel("Target Date (YYYY-MM-DD):"), gbc);
-        gbc.gridx = 1; dateField = new JTextField(LocalDate.now().plusYears(1).toString(), 15); goalCard.add(dateField, gbc);
+        gbc.gridx = 2;
+        JLabel targetLbl = new JLabel("Target Amount (₹):");
+        targetLbl.setForeground(Theme.TEXT_MUTED);
+        goalGrid.add(targetLbl, gbc);
+
+        gbc.gridx = 3;
+        targetField = new JTextField(15);
+        goalGrid.add(targetField, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        JLabel dateLbl = new JLabel("Target Date:");
+        dateLbl.setForeground(Theme.TEXT_MUTED);
+        goalGrid.add(dateLbl, gbc);
+
+        gbc.gridx = 1;
+        dateField = new JTextField(LocalDate.now().plusYears(1).toString(), 15);
+        goalGrid.add(dateField, gbc);
 
         gbc.gridx = 2; gbc.gridy = 1; gbc.gridwidth = 2;
+        gbc.insets = new Insets(12, 10, 6, 10);
         JButton createGoalBtn = UIHelper.createBlueButton("Create Savings Goal");
-        createGoalBtn.setPreferredSize(new Dimension(200, 38));
         createGoalBtn.addActionListener(e -> handleCreateGoal());
-        goalCard.add(createGoalBtn, gbc);
+        goalGrid.add(createGoalBtn, gbc);
 
+        goalCard.add(goalGrid, BorderLayout.CENTER);
         add(goalCard, BorderLayout.NORTH);
 
-        // Savings Table
-        tableModel = new DefaultTableModel(new Object[]{"ID", "Goal Name", "Target Amount", "Saved Amount", "Remaining Amount", "Progress %", "Target Date", "Status"}, 0);
+        // Savings Table Card
+        JPanel tableCard = UIHelper.createCardPanel("Active Savings Goals & Milestones");
+        tableModel = new DefaultTableModel(new Object[]{"ID", "Goal Name", "Target Amount", "Saved Amount", "Remaining", "Progress %", "Target Date", "Status"}, 0) {
+            private static final long serialVersionUID = 1L;
+            @Override
+            public boolean isCellEditable(int row, int col) { return false; }
+        };
         JTable table = new JTable(tableModel);
+        table.setRowHeight(32);
+        tableCard.add(new JScrollPane(table), BorderLayout.CENTER);
 
-        JPanel centerPanel = new JPanel(new BorderLayout(5, 5));
-        centerPanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
+        bottomBtnPanel.setOpaque(false);
 
-        JPanel bottomBtnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
-        JButton depositGoalBtn = UIHelper.createBlueButton("Add Funds to Selected Goal");
+        JButton depositGoalBtn = UIHelper.createBlueButton("Add Funds to Goal");
         depositGoalBtn.addActionListener(e -> handleDepositToGoal(table));
         bottomBtnPanel.add(depositGoalBtn);
 
-        JButton deleteGoalBtn = UIHelper.createBlueButton("Delete Selected Goal");
+        JButton deleteGoalBtn = new JButton("Delete Selected");
+        deleteGoalBtn.setFont(Theme.BODY_BOLD);
+        deleteGoalBtn.setBackground(new Color(38, 44, 54));
+        deleteGoalBtn.setForeground(Theme.TEXT_PRIMARY);
+        deleteGoalBtn.setFocusPainted(false);
         deleteGoalBtn.addActionListener(e -> handleDeleteGoal(table));
         bottomBtnPanel.add(deleteGoalBtn);
 
-        centerPanel.add(bottomBtnPanel, BorderLayout.SOUTH);
-        add(centerPanel, BorderLayout.CENTER);
+        tableCard.add(bottomBtnPanel, BorderLayout.SOUTH);
+        add(tableCard, BorderLayout.CENTER);
     }
 
     public void refreshData() {
@@ -188,13 +220,5 @@ public class SavingsPanel extends JPanel {
         } catch (Exception ex) {
             UIHelper.showError(this, "Delete Error: " + ex.getMessage());
         }
-    }
-
-    public static class SavingsGoalItem {
-        private SavingsGoal goal;
-        public SavingsGoalItem(SavingsGoal goal) { this.goal = goal; }
-        public SavingsGoal getGoal() { return goal; }
-        @Override
-        public String toString() { return goal.getGoalName() + " (ID: " + goal.getGoalId() + ")"; }
     }
 }

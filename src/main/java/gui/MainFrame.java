@@ -64,11 +64,12 @@ public class MainFrame extends JFrame {
         this.savingsGoalService.addObserver(notifObs);
         this.savingsGoalService.addObserver(rewardObs);
 
-        setTitle("Digital Wallet & Finance Tracker - Main Dashboard");
+        setTitle("WalletWise — Digital Wallet & Personal Finance Tracker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1150, 780);
-        setMinimumSize(new Dimension(980, 680));
-        setLocationRelativeTo(null);
+
+        // Maximize to entire screen viewport
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setMinimumSize(new Dimension(1024, 720));
 
         initUI();
         refreshAllPanels();
@@ -76,37 +77,47 @@ public class MainFrame extends JFrame {
 
     private void initUI() {
         JPanel mainContainer = new JPanel(new BorderLayout());
+        mainContainer.setBackground(Theme.BG_DARK);
 
         // Header Panel
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
-        headerPanel.setBackground(new Color(25, 25, 25));
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.CARD_BORDER),
+                new EmptyBorder(16, 28, 16, 28)
+        ));
+        headerPanel.setBackground(Theme.HEADER_BG);
 
-        JPanel headerInfo = new JPanel(new GridLayout(2, 1));
+        JPanel headerInfo = new JPanel(new GridLayout(2, 1, 0, 4));
         headerInfo.setOpaque(false);
 
         greetingLabel = new JLabel("Welcome back!");
-        greetingLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
-        greetingLabel.setForeground(Color.WHITE);
+        greetingLabel.setFont(Theme.TITLE_FONT);
+        greetingLabel.setForeground(Theme.TEXT_PRIMARY);
 
         walletInfoLabel = new JLabel("Wallet Info");
         walletInfoLabel.setFont(Theme.BODY_FONT);
-        walletInfoLabel.setForeground(Color.LIGHT_GRAY);
+        walletInfoLabel.setForeground(Theme.TEXT_MUTED);
 
         headerInfo.add(greetingLabel);
         headerInfo.add(walletInfoLabel);
 
-        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        JPanel headerRight = new JPanel(new FlowLayout(FlowLayout.RIGHT, 18, 0));
         headerRight.setOpaque(false);
 
         balanceLabel = new JLabel("Balance: ₹0.00");
-        balanceLabel.setFont(new Font("SansSerif", Font.BOLD, 20));
+        balanceLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         balanceLabel.setForeground(Theme.SUCCESS_COLOR);
 
-        JButton refreshBtn = UIHelper.createBlueButton("Refresh State");
+        JButton refreshBtn = UIHelper.createBlueButton("⟳ Refresh");
         refreshBtn.addActionListener(e -> refreshAllPanels());
 
-        JButton logoutBtn = UIHelper.createBlueButton("Logout");
+        JButton logoutBtn = new JButton("Log Out");
+        logoutBtn.setFont(Theme.BODY_BOLD);
+        logoutBtn.setBackground(new Color(38, 44, 54));
+        logoutBtn.setForeground(Theme.TEXT_PRIMARY);
+        logoutBtn.setFocusPainted(false);
+        logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        logoutBtn.setBorder(new EmptyBorder(8, 16, 8, 16));
         logoutBtn.addActionListener(e -> handleLogout());
 
         headerRight.add(balanceLabel);
@@ -131,6 +142,7 @@ public class MainFrame extends JFrame {
         // Tabbed Container
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setFont(Theme.HEADER_FONT);
+        tabbedPane.setBorder(new EmptyBorder(8, 14, 14, 14));
 
         tabbedPane.addTab("Dashboard", dashboardPanel);
         tabbedPane.addTab("Wallet", walletPanel);
@@ -157,9 +169,9 @@ public class MainFrame extends JFrame {
             }
 
             // Update Header Labels
-            greetingLabel.setText("Welcome back, " + currentUser.getFullName() + " (" + currentUser.getEmail() + ")");
-            walletInfoLabel.setText("Wallet ID: " + currentWallet.getWalletId() + " | Type: " + currentWallet.getWalletType());
-            balanceLabel.setText("Balance: ₹" + currentWallet.getBalance().toPlainString());
+            greetingLabel.setText("Welcome back, " + currentUser.getFullName());
+            walletInfoLabel.setText("Wallet #" + currentWallet.getWalletId() + " (" + currentWallet.getWalletType() + ")  •  " + currentUser.getEmail());
+            balanceLabel.setText("₹" + currentWallet.getBalance().toPlainString());
 
             // Refresh all sub-panels
             dashboardPanel.refreshData();
