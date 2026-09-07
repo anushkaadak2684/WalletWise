@@ -33,8 +33,8 @@ WalletWise was built to demonstrate how a real-world financial management domain
 * **Atomic JDBC Transactions**: Balance updates and ledger entries execute in atomic transactions (`commit`/`rollback`) with full data integrity.
 
 ### 💸 Expense Tracking & Category Analytics
-* **Expense Classification**: Differentiates between **Fixed Expenses** (recurring bills, rent) and **Variable Expenses** (groceries, entertainment).
-* **Category Breakdown**: Categorizes expenses across `Food`, `Rent`, `Utilities`, `Entertainment`, `Shopping`, `Healthcare`, and `Other`.
+* **Expense Classification**: Differentiates between **Fixed Expenses** (recurring bills, rent) and **Variable Expenses** (groceries, leisure).
+* **Category Breakdown**: Categorizes expenses across `Food`, `Travel`, `Shopping`, `Entertainment`, `Health`, `Education`, and `Other`.
 * **Visual Pie Chart**: Custom component rendering interactive expense category distribution in `WalletPanel`.
 
 ### 📈 Category Budgeting & Proactive Alerts
@@ -54,7 +54,6 @@ WalletWise was built to demonstrate how a real-world financial management domain
 ### 📊 Comprehensive Financial Reports
 * **Periodical Reporting**: Generate statements across **Monthly**, **Yearly**, and **Custom** intervals.
 * **Itemized Side-Pane Viewer**: Synchronized dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
-* **Data Export**: Export generated financial statements to CSV format.
 
 ---
 
@@ -134,12 +133,9 @@ The domain models real-world relationships through object composition:
 
 ```text
 User
- ├── Wallet
- │    ├── List<Transaction>
- │    └── List<Expense>
- ├── List<SavingsGoal>
- ├── List<Notification>
- └── List<Reward>
+ └── Wallet
+      ├── List<Transaction>
+      └── List<Expense>
 ```
 
 ---
