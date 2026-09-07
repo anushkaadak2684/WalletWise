@@ -1,22 +1,22 @@
-# 💳 WalletWise — Object-Oriented Digital Wallet & Personal Finance System
+# 💳 WalletWise - Object-Oriented Digital Wallet & Personal Finance System
 
-**WalletWise** is an end-to-end **object-oriented software system** that models a digital wallet and personal finance management domain.
+**WalletWise** is an end-to-end **object-oriented software system** for digital wallet and personal finance management.
 
-The primary goal of the project is **not just the desktop interface itself**, but the design and implementation of a maintainable financial application using **object-oriented programming, SOLID principles, design patterns, persistence, transactional data management, and secure authentication**.
+The project focuses on the design and implementation of a maintainable financial application using **object-oriented programming, SOLID principles, design patterns, persistence, transactional data management, and secure authentication**.
 
-The current implementation uses **Java 17 + Swing (FlatLaf)** as the presentation layer and **MySQL** for persistence. The architecture is intentionally layered and decoupled so that the presentation layer can be replaced with a **web application, REST API, or mobile client** without fundamentally redesigning the domain and business logic.
+The application currently uses **Java 17 + Swing (FlatLaf)** as the presentation layer and **MySQL** for persistence. Its layered architecture keeps business logic independent of the user interface, allowing the presentation layer to be replaced with a **web application, REST API, or mobile client** without redesigning domain logic.
 
 ---
 
 ## 🎯 Project Objective
 
-WalletWise was built to demonstrate how a real-world financial management domain can be modeled and engineered using **Object-Oriented Programming and clean architectural principles from end to end**:
+WalletWise demonstrates how a financial management system can be modeled and implemented using **object-oriented design and layered architecture**:
 
-* **Rich Domain Modeling**: Translating complex financial entities and business constraints into encapsulated, type-safe domain objects rather than procedural CRUD scripts.
-* **Separation of Concerns**: Establishing a strict 3-tier boundary so business rules are decoupled from both the presentation client and database persistence.
-* **ACID Transactional Consistency**: Guaranteeing data integrity across multi-table financial operations through single-connection JDBC transactions.
-* **Event-Driven Decoupling**: Leveraging the Observer Pattern to handle notifications and gamification as decoupled side-effects of financial events.
-* **Presentation Independence**: Ensuring the core service and domain layers can seamlessly support alternative clients (such as a REST API, Web UI, or mobile application) without modifying business logic.
+* **Domain Modeling**: Encapsulating financial entities, state, and business rules into type-safe domain objects.
+* **Separation of Concerns**: Maintaining a clear 3-tier boundary between presentation, business logic, and database persistence.
+* **Transactional Integrity**: Ensuring data consistency across multi-table operations using single-connection JDBC transactions.
+* **Event-Driven Decoupling**: Using the Observer Pattern to handle notifications and rewards without coupling them to core transaction logic.
+* **Client Independence**: Designing the domain and service layers so alternative clients (REST API, Web UI) can be connected without rewriting business logic.
 
 ---
 
@@ -24,42 +24,42 @@ WalletWise was built to demonstrate how a real-world financial management domain
 
 ### 🏦 Wallet Management
 * **Specialized Wallet Types**: Supports **Personal Wallet** (monthly spending limits) and **Business Wallet** (per-transaction limits).
-* **Live Balance & Utilization Metrics**: Real-time balance tracking, dynamic utilization indicators, and status indicators (`SAFE` vs `LIMIT EXCEEDED`).
-* **Subtype Polymorphism**: Dynamic method dispatch evaluates spending limit thresholds polymorphically without type inspection (`instanceof`).
+* **Live Balance & Utilization**: Real-time balance tracking, utilization metrics, and status indicators (`SAFE` vs `LIMIT EXCEEDED`).
+* **Subtype Polymorphism**: Dynamic method dispatch evaluates spending limits polymorphically without `instanceof` checks.
 
 ### 💳 Transactions (Deposits & Withdrawals)
 * **Ledger Entries**: Record deposits (income) and withdrawals (expenses/transfers) with custom descriptions.
-* **Audit History**: Real-time activity history and automated transaction receipts.
-* **Atomic JDBC Transactions**: Balance updates and ledger entries execute in atomic transactions (`commit`/`rollback`) with full data integrity.
+* **Audit History**: Activity log and automated transaction receipts.
+* **Transactional Safety**: Balance updates and transaction records execute within database transactions (`commit`/`rollback`).
 
 ### 💸 Expense Tracking & Category Analytics
 * **Expense Classification**: Differentiates between **Fixed Expenses** (recurring bills, rent) and **Variable Expenses** (groceries, leisure).
 * **Category Breakdown**: Categorizes expenses across `Food`, `Travel`, `Shopping`, `Entertainment`, `Health`, `Education`, and `Other`.
-* **Visual Pie Chart**: Custom component rendering interactive expense category distribution in `WalletPanel`.
+* **Category Visualizer**: Custom component rendering category expense distribution in `WalletPanel`.
 
-### 📈 Category Budgeting & Proactive Alerts
+### 📈 Category Budgeting & Alerts
 * **Budget Ceilings**: Define category spending limits with custom start and end dates.
 * **80% Caution Alert**: Warns users when category spending reaches or crosses 80% of budget.
-* **100% Budget Breach Alert**: Generates immediate overspending alerts when a category limit is exceeded.
+* **100% Budget Breach Alert**: Generates overspending alerts when a category limit is exceeded.
 
-### 🎯 Savings Goals & Gamified Rewards
-* **Target-Driven Milestones**: Establish target savings goals with custom target dates.
-* **Atomic Goal Contributions**: Transfer funds directly into savings goals from active wallet balances in an atomic transaction.
-* **Gamification**: Earn **+100 Reward Points** and system achievement notifications automatically upon completing a savings goal via the Observer Pattern.
+### 🎯 Savings Goals & Rewards
+* **Target-Driven Goals**: Create savings goals with target amounts and completion dates.
+* **Goal Contributions**: Transfer funds directly from active wallet balances into savings goals with transactional consistency.
+* **Reward System**: Automatically awards **+100 Reward Points** and milestone alerts upon goal completion via the Observer Pattern.
 
 ### 🔔 Notifications & Activity Center
 * **In-App Notification Center**: Tracks transaction receipts, savings milestones, and unread badges.
-* **Proactive Alerts**: Immediate warning dialogs and banners for spending limit overruns and budget thresholds.
+* **Threshold Alerts**: Warning dialogs and banners for spending limit overruns and budget thresholds.
 
-### 📊 Comprehensive Financial Reports
-* **Periodical Reporting**: Generate statements across **Monthly**, **Yearly**, and **Custom** intervals.
-* **Itemized Side-Pane Viewer**: Synchronized dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
+### 📊 Financial Reports
+* **Periodic Reporting**: Generate statements across **Monthly**, **Yearly**, and **Custom** intervals.
+* **Itemized Side-Pane Viewer**: Dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
 
 ---
 
 ## 🏗️ Architecture at a Glance
 
-WalletWise follows a **strict, decoupled 3-tier layered architecture**:
+WalletWise follows a **decoupled 3-tier layered architecture**:
 
 ```text
 ┌────────────────────────────────────────────────────────┐
@@ -84,20 +84,20 @@ WalletWise follows a **strict, decoupled 3-tier layered architecture**:
 
         Domain Model + Encapsulated OOP Entities
         Observer Event Bus (WalletEventListener)
-        BCrypt Cryptographic Security (Cost Factor 12)
-        Single-Connection JDBC Transaction Demarcation
+        BCrypt Password Hashing (Cost Factor 12)
+        Single-Connection JDBC Transactions
 ```
 
-The **domain and service layers are designed independently of the Swing UI**, allowing the same core business engine to power alternative clients (CLI, REST API, Web) without modifying domain logic.
+The **domain and service layers are decoupled from the Swing UI**, allowing the core business engine to support alternative clients (CLI, REST API, Web) without modifying domain logic.
 
 ---
 
 ## 🧩 Core Object-Oriented Design
 
-Object-Oriented Programming is the foundational design pillar of WalletWise.
+Object-Oriented Programming is central to the design of WalletWise:
 
 ### 1. Abstraction
-Abstract classes such as `Wallet` and `Expense` define common behavior while allowing specialized implementations.
+Abstract classes define common state and contract while delegating specific behavior to subclasses:
 
 ```text
 Wallet (Abstract Base)
@@ -109,27 +109,25 @@ Expense (Abstract Base)
  └── VariableExpense (Expected Maximums: Dining, Leisure)
 ```
 
-This enables the system to represent different financial behaviors through domain objects rather than procedural conditional logic.
-
 ### 2. Inheritance
-Specialized wallet and expense types inherit common state (`walletId`, `balance`, `category`, `amount`, `date`) from their respective abstractions while implementing their own domain rules (`monthlySpendingLimit`, `businessTransactionLimit`, `recurringFrequency`, `maximumExpectedAmount`).
+Specialized wallet and expense classes inherit common attributes (`walletId`, `balance`, `category`, `amount`, `date`) while defining specific behavior and fields (`monthlySpendingLimit`, `businessTransactionLimit`, `recurringFrequency`, `maximumExpectedAmount`).
 
 ### 3. Polymorphism & Dynamic Method Dispatch
-Subclass-specific behaviors are resolved through **dynamic method dispatch** at runtime:
+Subclass-specific behaviors are resolved at runtime via method overriding:
 * `calculateTransactionLimit()`: Computes the applicable spending boundary.
 * `isLimitExceeded(BigDecimal amount)`: Evaluates if a transaction breaches limits.
-* `getLimitWarningMessage()`: Produces subtype-specific warning descriptions.
-* `getExpenseType()`: Identifies the expense classification (`FIXED` vs `VARIABLE`).
+* `getLimitWarningMessage()`: Returns subtype-specific warning text.
+* `getExpenseType()`: Returns the expense classification (`FIXED` vs `VARIABLE`).
 
-The service layer (e.g. `WalletService.withdrawMoney` or `ExpenseService.addExpense`) operates directly on the `Wallet` abstraction without needing `instanceof` conditional checks.
+The service layer operates directly on the `Wallet` and `Expense` abstractions without needing `instanceof` conditional checks.
 
 ### 4. Encapsulation & Defensive Copying
-Domain state is strictly `private` and accessed through guarded getters and validated setters:
-* Monetary values are validated using `java.math.BigDecimal` to ensure positive, non-zero amounts.
-* Collections (`transactions`, `expenses`) use **defensive copying** in getters (`new ArrayList<>(transactions)`) to prevent external callers from mutating internal entity state directly.
+Domain state is kept `private` and accessed through guarded getters and validated setters:
+* Monetary values use `BigDecimal` with positive-amount validation.
+* Collections (`transactions`, `expenses`) use **defensive copying** in getters (`new ArrayList<>(transactions)`) to prevent external code from mutating internal entity state directly.
 
 ### 5. Composition (HAS-A Relationships)
-The domain models real-world relationships through object composition:
+The domain models relationships through composition:
 
 ```text
 User
@@ -142,45 +140,45 @@ User
 
 ## 🏛️ SOLID Principles
 
-The architecture is built around the **SOLID design principles**:
+The codebase is organized around the **SOLID principles**:
 
 ### Single Responsibility Principle (SRP)
-Responsibilities are cleanly separated across dedicated layers:
+Each layer and class has a focused responsibility:
 * **Models**: Encapsulate domain state, invariants, and validation rules.
 * **Repositories**: Handle database access, SQL execution, and `ResultSet` mapping.
 * **Services**: Coordinate business operations and manage transaction boundaries.
 * **Observers**: Handle decoupled side-effects (notifications, reward points).
-* **GUI Components**: Manage user interface rendering and event capture.
+* **GUI Components**: Handle user interface rendering and input events.
 
 ### Open/Closed Principle (OCP)
-Core subsystems are **open for extension, but closed for modification**:
-* New wallet subtypes (e.g. `CryptoWallet`) or expense classifications can be added by extending base classes without altering existing service logic.
+Classes are open for extension and closed for modification:
+* New wallet subtypes (e.g. `CryptoWallet`) or expense types can be added by extending base classes without altering existing service logic.
 * New event listeners (e.g. `EmailNotificationObserver`) can subscribe to `WalletEventListener` without changing transaction code.
 
 ### Liskov Substitution Principle (LSP)
-Concrete wallet implementations (`PersonalWallet`, `BusinessWallet`) can seamlessly substitute the base `Wallet` abstraction across all services, repositories, and reporting routines without breaking system correctness.
+Concrete implementations (`PersonalWallet`, `BusinessWallet`) can substitute the base `Wallet` abstraction across services, repositories, and reporting routines without breaking application behavior.
 
 ### Interface Segregation Principle (ISP)
-Data access operations are partitioned into focused, role-specific repository interfaces (`IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `IExpenseRepository`, `IBudgetRepository`, `ISavingsGoalRepository`, `INotificationRepository`, `IRewardRepository`, `IReportRepository`) rather than a single monolithic interface.
+Data access operations are partitioned into focused repository interfaces (`IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `IExpenseRepository`, `IBudgetRepository`, `ISavingsGoalRepository`, `INotificationRepository`, `IRewardRepository`, `IReportRepository`) rather than a single monolithic interface.
 
 ### Dependency Inversion Principle (DIP)
-High-level service classes depend upon repository interfaces (`IWalletRepository`, `ITransactionRepository`) rather than concrete MySQL implementations. This decouples business logic from persistence technology and makes unit testing straightforward.
+Service classes depend on repository interfaces rather than concrete MySQL implementations, keeping business logic independent of database specifics.
 
 ---
 
 ## 🎨 Applied Design Patterns
 
 ### 1. Repository Pattern
-The Repository Pattern separates **domain business logic from database access**:
-* Services interact exclusively with repository interfaces.
-* Concrete repository classes encapsulate all SQL `PreparedStatement` executions and `ResultSet` mapping.
+Separates business logic from data access:
+* Services interact only with repository interfaces.
+* Concrete repository classes encapsulate SQL `PreparedStatement` executions and `ResultSet` mapping.
 
 ```text
 Service Layer  ──►  Repository Interface  ──►  MySQL Repository  ──►  JDBC & Database
 ```
 
 ### 2. Observer Pattern
-Financial events trigger independent side-effects without tightly coupling them to the core transaction flow:
+Decouples side-effects from core transaction flows:
 
 ```text
 Wallet / Expense / Savings Event
@@ -189,25 +187,25 @@ Wallet / Expense / Savings Event
       WalletEventListener (Event Bus)
                │
                ├── NotificationObserver (Transaction & Budget Alerts)
-               └── RewardObserver (+100 Pts Gamification on Goal Completion)
+               └── RewardObserver (+100 Pts on Goal Completion)
 ```
 
 Completing a savings goal automatically triggers reward points and in-app notifications without embedding reward logic inside `SavingsGoalService`.
 
 ### 3. Dependency Injection (Constructor Injection)
-Dependencies are injected into service and observer constructors, ensuring loose coupling, clear component lifecycles, and testability.
+Dependencies are passed into service and observer constructors, ensuring loose coupling and clean component lifecycles.
 
 ### 4. Single Table Inheritance (Database Pattern)
-Inheritance hierarchies (`Wallet` and `Expense`) are mapped to single database tables (`wallets`, `expenses`) using discriminator columns (`wallet_type`, `expense_type`), avoiding costly multi-table `JOIN` operations.
+Inheritance hierarchies (`Wallet` and `Expense`) map to single database tables (`wallets`, `expenses`) using discriminator columns (`wallet_type`, `expense_type`), avoiding unnecessary table joins.
 
 ---
 
 ## 💾 Persistence & Transaction Management
 
-WalletWise uses **MySQL with JDBC** for reliable relational persistence.
+WalletWise uses **MySQL with JDBC** for relational persistence.
 
 ### Atomic JDBC Transactions (ACID)
-Financial operations modifying multiple related tables are grouped into explicit atomic transactions on a single connection:
+Operations modifying multiple related tables are executed within explicit transactions on a shared connection:
 
 ```text
 BEGIN TRANSACTION (setAutoCommit(false))
@@ -224,21 +222,21 @@ If any step fails or an exception occurs:
 ROLLBACK (connection.rollback())
 ```
 
-This prevents partial state updates (e.g. deducting balance without recording the expense) and maintains database consistency.
+This prevents partial state updates and maintains database consistency.
 
-### Resource Leak Prevention
-Every JDBC `Connection`, `PreparedStatement`, and `ResultSet` is wrapped in Java **try-with-resources** blocks, ensuring deterministic connection release and preventing connection pool starvation.
+### Resource Management
+All JDBC `Connection`, `PreparedStatement`, and `ResultSet` instances are managed using Java **try-with-resources** blocks for deterministic closing and leak prevention.
 
 ---
 
 ## 🔐 Authentication & Security
 
-User authentication is secured using modern cryptographic hashing:
+User authentication and security practices include:
 
-* **Salted BCrypt Hashing**: Passwords are saved with a work factor of 12 via `at.favre.lib:bcrypt`.
-* **Constant-Time Verification**: Secure password verification protecting against timing attacks.
-* **Zero-Downtime Migration**: `UserService.authenticate()` automatically detects legacy plaintext records, verifies them, and transparently upgrades them to BCrypt hashes in the database upon successful login.
-* **SQL Injection Prevention**: 100% of database queries use parameterized `PreparedStatement` placeholders (`?`).
+* **BCrypt Password Hashing**: Passwords are saved with a work factor of 12 using `at.favre.lib:bcrypt`.
+* **Constant-Time Verification**: Protects against timing attacks during authentication.
+* **Automatic Password Upgrading**: Detects legacy plaintext passwords on login, verifies them, and upgrades them to BCrypt hashes in the database upon successful authentication.
+* **SQL Injection Protection**: All database operations use parameterized `PreparedStatement` queries.
 
 ---
 
@@ -261,7 +259,7 @@ Core Application ├── REST API / Web UI (Future Extension)
                  └── Mobile / CLI Client (Future Extension)
 ```
 
-The business logic is decoupled from the UI, meaning the same core system can be exposed through a REST controller, web frontend, or mobile application without modifying domain or persistence code.
+The business and domain layers can be exposed through a REST controller, web frontend, or mobile application without modifying core logic.
 
 ---
 
