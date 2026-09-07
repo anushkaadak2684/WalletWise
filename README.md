@@ -1,427 +1,157 @@
-# 💳 WalletWise — Object-Oriented Digital Wallet & Personal Finance System
+# 💳 WalletWise - Digital Wallet & Personal Finance Tracker
 
-**WalletWise** is an end-to-end **object-oriented software system** that models a digital wallet and personal finance management use case.
-
-The primary goal of the project is **not just the desktop interface itself**, but the design and implementation of a maintainable financial application using **object-oriented programming, SOLID principles, design patterns, persistence, transactional data management, and secure authentication**.
-
-The current implementation uses **Java 17 + Swing (FlatLaf)** as the presentation layer and **MySQL** for persistence. The architecture is intentionally layered and decoupled so that the presentation layer can be replaced with a **web application, REST API, or another client** without fundamentally redesigning the domain and business logic.
+A full-featured Desktop Application built in **Java 17 (Swing)** and **MySQL** for managing digital wallets, tracking expenses, establishing budgets, setting savings goals, and generating comprehensive financial reports. Features a modern dark UI powered by **FlatLaf**, BCrypt password security, proactive overspending alerts, and gamified reward tracking.
 
 ---
 
-## 🎯 Project Objective
+## 🌟 Key Features
 
-WalletWise was built to demonstrate how a real-world application can be designed and implemented using **OOP principles from end to end**.
+### 🏦 Wallet Management
+* **Wallet Types**: Supports **Personal Wallet** (monthly spending limits) and **Business Wallet** (per-transaction limits).
+* **Live Balance & Metrics**: Dynamic visual utilization bars, real-time balance updates, and status indicators (`SAFE` vs `LIMIT EXCEEDED`).
+* **Subtype Polymorphism**: Dynamic method dispatch evaluates spending limit thresholds polymorphically without type inspection (`instanceof`).
 
-The system models common financial operations such as:
+### 💳 Transactions (Deposits & Withdrawals)
+* Record deposits (income) and withdrawals (expenses/transfers) with custom descriptions.
+* Real-time activity history and automated system notification logging.
+* **Atomic JDBC Transactions**: Balance updates and ledger entries execute in atomic transactions (`commit`/`rollback`) with full data integrity.
 
-* Managing personal and business wallets with customizable spending limits
-* Recording deposits, withdrawals, and categorized expenses
-* Enforcing category budgets with proactive alerts (80% caution & 100% overrun)
-* Managing milestone-driven savings goals with automated rewards (+100 Points)
-* Tracking notifications and activity history
-* Generating comprehensive financial reports with rich summary views
-* Persisting application data in MySQL with zero resource leaks
-* Maintaining data consistency through atomic JDBC transactions (`commit` / `rollback`)
-* Securing user authentication with BCrypt password hashing and legacy account migration
+### 💸 Expense Tracking & Category Analytics
+* **Expense Classification**: Differentiates between **Fixed Expenses** (recurring bills, rent) and **Variable Expenses** (groceries, entertainment).
+* **Category Breakdown**: Categorize expenses across `Food`, `Rent`, `Utilities`, `Entertainment`, `Shopping`, `Healthcare`, and `Other`.
+* **Visual Pie Chart**: Custom Swing component rendering interactive expense category distribution in `WalletPanel`.
 
-The project focuses on **how these requirements are translated into objects, responsibilities, abstractions, relationships, and application layers** rather than simply implementing basic CRUD functionality.
+### 📈 Category Budgeting
+* Define category spending limits with start and end dates.
+* Real-time progress monitoring comparing limit vs actual spent (`ON TRACK` vs `EXCEEDED`).
 
----
+### 🎯 Savings Goals & Gamified Rewards
+* Establish target savings goals with target dates.
+* **Goal Contributions**: Deposit funds directly into savings goals from your active wallet balance in an atomic transaction.
+* **Gamification**: Earn **+100 Reward Points** and system achievement notifications automatically upon completing a savings goal via the Observer Pattern.
 
-## 🏗️ Architecture at a Glance
+### 🔔 Notifications & Smart Alerts
+* In-app Notification Center tracking transaction receipts, savings milestones, and unread badges.
+* **Proactive Alerts**: Immediate warnings on spending limit overruns and 80%/100% budget threshold triggers.
 
-WalletWise follows a **layered, object-oriented architecture**:
-
-```text
-┌──────────────────────────────────────┐
-│           Presentation Layer         │
-│       Java Swing + FlatLaf UI        │
-└──────────────────┬───────────────────┘
-                   │ (Calls Service Methods)
-┌──────────────────▼───────────────────┐
-│             Service Layer            │
-│       Business Rules & Use Cases     │
-└──────────────────┬───────────────────┘
-                   │ (Calls Repository Interfaces)
-┌──────────────────▼───────────────────┐
-│           Repository Layer           │
-│       Interfaces + MySQL/JDBC        │
-└──────────────────┬───────────────────┘
-                   │ (Reads / Writes SQL)
-┌──────────────────▼───────────────────┐
-│             MySQL Database           │
-│              Persistence             │
-└──────────────────────────────────────┘
-
-       Domain Model + OOP Abstractions
-       Observer-based Event Handling
-       BCrypt Authentication (Cost Factor 12)
-       Single-Connection Transaction Management
-```
-
-The **domain and service layers are designed independently of the Swing UI**, allowing the same business logic to support a different presentation layer in the future.
+### 📊 Comprehensive Financial Reports
+* Generate periodical reports (**Monthly**, **Yearly**, **Custom**).
+* **Itemized Side-Pane Viewer**: Synchronized dual-pane view rendering detailed HTML breakdowns (income, expenses, budgets, savings) directly in the side panel.
 
 ---
 
-## 🧩 Core Object-Oriented Design
+## 📐 Software Design & Architecture Principles
 
-Object-Oriented Programming is the foundational design pillar of WalletWise.
+### 🧩 1. Object-Oriented Programming (OOP) Concepts
+* **Abstraction**: Abstract base classes `Wallet` and `Expense` define essential domain behaviors while hiding internal implementation details. Public interfaces define strict subsystem boundaries.
+* **Inheritance**: Class hierarchies like `PersonalWallet` and `BusinessWallet` (extending `Wallet`), as well as `FixedExpense` and `VariableExpense` (extending `Expense`), promote clean code reuse and specialization.
+* **Polymorphism**: Dynamic method dispatch (`isLimitExceeded()`, `calculateTransactionLimit()`, `getLimitWarningMessage()`) allows uniform processing of specialized wallet instances and expense classifications without `instanceof` conditional branching.
+* **Encapsulation**: Strict private member scoping across domain entities (`User`, `Wallet`, `Expense`, etc.) protected with validation routines and defensive copying in collection getters (`getTransactions()`, `getExpenses()`).
+* **Composition**: Favors object composition (`User` *has-a* `Wallet`, `Wallet` *has-a* list of `Transaction` and `Expense` records).
 
-### 1. Abstraction
+### 🏛️ 2. SOLID Design Principles
+* **Single Responsibility Principle (SRP)**: Strict separation of concerns between data entities (`model`), data persistence (`repository`), business rules & transactions (`service`), event subscribers (`observer`), and UI components (`gui`).
+* **Open/Closed Principle (OCP)**: Modular architecture allows adding new wallet types or expense classifications by extending base classes without modifying core service or repository logic.
+* **Liskov Substitution Principle (LSP)**: Derived classes (`PersonalWallet`, `BusinessWallet`) seamlessly substitute base `Wallet` instances across all services and reports without unexpected behavior.
+* **Interface Segregation Principle (ISP)**: Fine-grained repository contracts isolated inside `repository.interfaces` (`IUserRepository`, `IWalletRepository`, `ITransactionRepository`, `IExpenseRepository`, `IBudgetRepository`, `ISavingsGoalRepository`, `INotificationRepository`, `IRewardRepository`, `IReportRepository`).
+* **Dependency Inversion Principle (DIP)**: Service classes depend directly on interface abstractions rather than tight coupling to concrete MySQL repository implementations.
 
-Abstract classes such as `Wallet` and `Expense` define common contracts and essential behavior while delegating specialized implementation details to concrete subclasses.
-
-```text
-Wallet (Abstract Base)
- ├── PersonalWallet (Monthly Spending Limit)
- └── BusinessWallet (Per-Transaction Ceiling)
-
-Expense (Abstract Base)
- ├── FixedExpense (Recurring Frequency: Rent, Bills)
- └── VariableExpense (Expected Maximums: Dining, Leisure)
-```
-
-This enables the system to represent diverse financial behaviors through domain models rather than procedural conditional checks.
-
-### 2. Inheritance
-
-Specialized wallet and expense subclasses inherit common state (`walletId`, `balance`, `category`, `amount`, `date`) from their base abstractions while providing specialized attributes (`monthlySpendingLimit`, `businessTransactionLimit`, `recurringFrequency`, `maximumExpectedAmount`).
-
-### 3. Polymorphism & Dynamic Method Dispatch
-
-Subclass-specific behaviors such as:
-
-* `calculateTransactionLimit()`
-* `isLimitExceeded(BigDecimal amount)`
-* `getLimitWarningMessage()`
-* `getExpenseType()`
-
-are resolved through **dynamic method dispatch** at runtime.
-
-The service layer (e.g., `WalletService.withdrawMoney` or `ExpenseService.addExpense`) operates directly on the base `Wallet` abstraction without needing `instanceof` inspections or type-switching conditionals.
-
-### 4. Encapsulation & Defensive Copying
-
-Domain state is strictly `private` and accessed through guarded getters and validated setters.
-* Monetary values are validated using `java.math.BigDecimal` to ensure positive, non-zero values.
-* Collection fields (`transactions`, `expenses`) use **defensive copying** in getters (`new ArrayList<>(transactions)`) to prevent external callers from mutating internal entity state directly.
-
-### 5. Composition (HAS-A Relationships)
-
-The domain models real-world financial relationships using object composition:
-
-```text
-User
- └── Wallet
-      ├── Transactions
-      └── Expenses
-
-User
- └── Savings Goals
-
-User
- └── Notifications & Rewards
-```
+### 🎨 3. Design Patterns
+* **Observer Pattern**: `WalletEventListener` along with `NotificationObserver` and `RewardObserver` reacts synchronously to wallet transactions, completed savings milestones, and overspending triggers, completely decoupling side-effects from core business logic.
+* **Repository Pattern**: Decouples domain entities and services from low-level JDBC SQL queries while managing connection-aware transaction boundaries.
 
 ---
 
-## 🏛️ SOLID Principles
+## 🔒 Security & Data Integrity
 
-The architecture is built around the **SOLID design principles**:
-
-### Single Responsibility Principle (SRP)
-Responsibilities are cleanly separated across distinct layers:
-* **Models** encapsulate domain state and validation.
-* **Repositories** handle raw SQL queries and JDBC mapping.
-* **Services** orchestrate business rules and transaction boundaries.
-* **Observers** react to event-driven side-effects.
-* **GUI Components** manage UI layout and user interaction.
-
-### Open/Closed Principle (OCP)
-The system is **open for extension, but closed for modification**:
-* New wallet types (e.g., `CryptoWallet`) can be added by extending `Wallet` without modifying existing service code.
-* New event listeners (e.g., `EmailNotificationObserver`) can be attached to `WalletEventListener` without changing core transaction services.
-
-### Liskov Substitution Principle (LSP)
-Concrete wallet implementations (`PersonalWallet`, `BusinessWallet`) can seamlessly substitute the base `Wallet` abstraction across services, repositories, and reporting components without breaking correctness.
-
-### Interface Segregation Principle (ISP)
-Data access operations are partitioned into focused, role-specific repository interfaces rather than one monolithic repository:
-```text
-IUserRepository
-IWalletRepository
-ITransactionRepository
-IExpenseRepository
-IBudgetRepository
-ISavingsGoalRepository
-INotificationRepository
-IRewardRepository
-IReportRepository
-```
-
-### Dependency Inversion Principle (DIP)
-High-level service classes depend upon repository interfaces (`IWalletRepository`, `ITransactionRepository`) rather than concrete MySQL implementations. This decouples business logic from persistence technology and makes unit testing straightforward.
-
----
-
-## 🎨 Applied Design Patterns
-
-### 1. Repository Pattern
-The Repository Pattern separates **domain business logic from database access**:
-* Services interact solely with repository interfaces.
-* Concrete repository classes encapsulate all SQL `PreparedStatement` executions and `ResultSet` mapping.
-
-```text
-Service Layer
-     ↓
-Repository Interface (e.g., IExpenseRepository)
-     ↓
-MySQL Repository (e.g., ExpenseRepository)
-     ↓
-JDBC Driver & MySQL Database
-```
-
-### 2. Observer Pattern
-Financial transactions trigger independent side-effects without tightly coupling them to the core execution path:
-
-```text
-Wallet / Expense / Savings Event
-               │
-               ▼
-      WalletEventListener (Event Bus)
-               │
-               ├── NotificationObserver (In-App Transaction & Budget Alerts)
-               └── RewardObserver (+100 Pts Gamification on Goal Completion)
-```
-
-Completing a savings goal automatically triggers reward points and in-app notifications without embedding reward logic inside `SavingsGoalService`.
-
-### 3. Dependency Injection (Constructor Injection)
-Dependencies are injected into service and observer constructors, ensuring loose coupling and clean component lifecycles.
-
-### 4. Single Table Inheritance (Database Pattern)
-Inheritance hierarchies (`Wallet` and `Expense`) are mapped to single database tables (`wallets`, `expenses`) using discriminator columns (`wallet_type`, `expense_type`), avoiding costly multi-table `JOIN` operations.
-
----
-
-## 💾 Persistence & Transaction Management
-
-WalletWise uses **MySQL with JDBC** for reliable relational persistence.
-
-### Atomic JDBC Transactions (ACID)
-Financial operations modifying multiple related tables are grouped into explicit atomic transactions on a single connection:
-
-```text
-BEGIN TRANSACTION (setAutoCommit(false))
-  │
-  ├── 1. Update Wallet Balance (walletRepository.update(conn, wallet))
-  ├── 2. Save Expense / Goal (expenseRepository.save(conn, expense, walletId))
-  └── 3. Record Audit Transaction (transactionRepository.save(conn, tx, walletId))
-  │
-COMMIT (connection.commit())
-```
-
-If any step fails or an exception occurs:
-```text
-ROLLBACK (connection.rollback())
-```
-
-This prevents partial state updates (e.g., deducting balance without recording the expense) and preserves database consistency.
-
-### Resource Leak Prevention
-Every JDBC `Connection`, `PreparedStatement`, and `ResultSet` is wrapped in Java **try-with-resources** blocks, ensuring deterministic connection release and preventing connection pool starvation.
-
----
-
-## 🔐 Authentication & Security
-
-User authentication is secured using modern cryptographic hashing:
-
-* **Salted BCrypt Hashing**: Passwords are hashed using BCrypt with a work factor of 12 via `at.favre.lib:bcrypt`.
-* **Zero-Downtime Migration**: `UserService.authenticate()` automatically checks legacy plaintext records, verifies them, and transparently upgrades them to BCrypt hashes in the database upon successful login.
-* **SQL Injection Prevention**: 100% of database queries use parameterized `PreparedStatement` placeholders (`?`).
-
----
-
-## 💰 Financial Domain Features
-
-While architecture is the primary focus, WalletWise implements a complete, practical financial management suite:
-
-### 🏦 Wallets
-* **Personal Wallets**: Monthly spending limit tracking.
-* **Business Wallets**: Per-transaction ceiling tracking.
-* **Metrics**: Real-time balance monitoring and visual utilization indicators.
-
-### 💳 Transactions
-* Deposits (income) and withdrawals (expenses/transfers).
-* Real-time transaction ledger and activity history.
-* Atomic balance updates and audit logging.
-
-### 💸 Expenses & Category Analytics
-* **Expense Classification**: Fixed expenses (recurring bills) and Variable expenses (discretionary spending).
-* **Categories**: `Food`, `Rent`, `Utilities`, `Entertainment`, `Shopping`, `Healthcare`, and `Other`.
-* **Visual Analytics**: Interactive expense category distribution in the wallet panel.
-
-### 📈 Category Budgets & Proactive Alerts
-* Set category-level spending limits with start and end dates.
-* **80% Caution Alert**: Warns users when category spending reaches or crosses 80% of budget.
-* **100% Budget Breach Alert**: Generates immediate overspending alerts when a category limit is exceeded.
-
-### 🎯 Savings Goals & Gamification
-* Set target amounts and completion dates.
-* Contribute funds directly from wallet balances in atomic transactions.
-* Earn **+100 Reward Points** and milestone badges upon goal achievement.
-
-### 🔔 Notification Center
-* Tracks transaction confirmations, spending limit warnings, budget threshold alerts, and savings milestones.
-* Mark notifications as read or clear notification history.
-
-### 📊 Financial Reports
-* Generate **Monthly**, **Yearly**, and **Custom-period** financial statements.
-* Itemized breakdowns of total income, expenses, savings allocations, and net balance.
-* Formatted HTML summary preview and exportable CSV records.
-
----
-
-## 🖥️ Presentation Layer
-
-The current presentation layer is implemented using:
-
-* **Java Swing**
-* **FlatLaf Look and Feel** (Modern Obsidian Dark Theme: `#0D1117` canvas, `#161B22` cards)
-
-Swing was chosen as a lightweight client for visualizing and interacting with the system.
-
-However, **the desktop UI is not the architectural boundary of the application**:
-
-```text
-                 ┌── Swing Desktop UI (Current Client)
-                 │
-Core Application ├── REST API / Web UI (Future Extension)
-(Domain/Service) │
-                 └── Mobile / CLI Client (Future Extension)
-```
-
-The business logic is decoupled from the UI, meaning the same core system can be exposed through a REST controller, web frontend, or mobile application without modifying domain or persistence code.
+* **BCrypt Password Hashing**: Passwords are encrypted using salted BCrypt hashes (cost factor 12) via `at.favre.lib:bcrypt:0.10.2`.
+* **Zero-Downtime Migration**: `UserService.authenticate()` automatically detects legacy plaintext records upon login, verifies them, and transparently upgrades them to BCrypt hashes in the database.
+* **Atomic Transactions**: Multi-table operations (`deposit`, `withdraw`, `addExpense`, `contributeToSavingsGoal`) use `conn.setAutoCommit(false)`, `commit()`, and `rollback()` on failure.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology | Version | Purpose |
-| :--- | :--- | :--- | :--- |
-| **Language** | Java | 17 LTS | Core object-oriented programming language |
-| **Architecture** | Layered Architecture | — | Separation of Presentation, Service, Repo, Model |
-| **UI Framework** | Java Swing | Native | Desktop user interface client |
-| **UI Styling** | FlatLaf | 3.5.2 | Modern dark theme and component styling |
-| **Persistence** | MySQL | 8.0+ | Relational database storage |
-| **Database Access** | JDBC Connector/J | 8.3.0 | Low-level SQL execution and transaction control |
-| **Security** | Favre BCrypt | 0.10.2 | Salted cryptographic password hashing |
-| **Build Tool** | Apache Maven | 3.x | Dependency and build lifecycle management |
+* **Language**: Java 17+
+* **Build System**: Apache Maven
+* **GUI Framework**: Java Swing with FlatLaf (FlatDarkLaf)
+* **Database**: MySQL 8.0+
+* **JDBC Driver**: MySQL Connector/J
+* **Security**: Favre BCrypt 0.10.2
+* **Architecture**: Layered Architecture (Model/Enums - Repository/Interfaces - Service - Observer - GUI)
 
 ---
 
 ## 📁 Project Structure
 
-```text
+```
 WalletWise/
-│
 ├── database/
-│   └── schema.sql                  # MySQL 3NF database schema & constraints
-│
-├── lib/                            # Bundled libraries (FlatLaf, BCrypt, MySQL Connector)
-│   ├── flatlaf-3.5.2.jar
-│   ├── bcrypt-0.10.2.jar
-│   ├── bytes-1.5.0.jar
-│   └── mysql-connector-j-26.7.0.jar
-│
-├── pom.xml                         # Maven build descriptor
-│
-├── src/main/java/
-│   ├── gui/                        # Presentation Layer (Swing + FlatLaf)
-│   │   ├── Main.java               # Application Entry Point
-│   │   ├── MainFrame.java          # Main Application Shell
-│   │   ├── LoginRegisterFrame.java # Authentication Window
-│   │   ├── Theme.java              # Dark Theme Palette & Geometry Tokens
-│   │   ├── UIHelper.java           # Reusable UI Card Panels & Helpers
-│   │   └── *Panel.java             # Dashboard, Wallet, Expense, Budget, etc.
-│   │
-│   ├── model/                      # Domain Model (OOP Entities & Value Objects)
-│   │   ├── enums/                  # Category, TransactionType, WalletType
-│   │   ├── Wallet.java             # Abstract Base Wallet
-│   │   ├── PersonalWallet.java     # Subclass with monthly limit
-│   │   ├── BusinessWallet.java     # Subclass with per-transaction limit
-│   │   ├── Expense.java            # Abstract Base Expense
-│   │   ├── FixedExpense.java       # Subclass with recurring frequency
-│   │   ├── VariableExpense.java    # Subclass with maximum limit
-│   │   └── User.java, Budget.java, SavingsGoal.java, Transaction.java, Report.java, Reward.java
-│   │
-│   ├── observer/                   # Event-Driven Observer Subsystem
-│   │   ├── WalletEventListener.java   # Event Bus Contract
-│   │   ├── NotificationObserver.java  # In-app alert listener
-│   │   └── RewardObserver.java        # Gamified reward points listener
-│   │
-│   ├── repository/                 # Data Access Layer (JDBC Implementations)
-│   │   ├── interfaces/             # Segregated Repository Contracts (I*Repository)
-│   │   └── *Repository.java        # Parameterized SQL PreparedStatement queries
-│   │
-│   ├── service/                    # Business Logic & ACID Transaction Management
-│   │   └── *Service.java           # WalletService, ExpenseService, SavingsGoalService, etc.
-│   │
-│   └── util/                       # Infrastructure Utilities
-│       └── DBConnection.java       # JDBC Connection Factory
-│
-├── .env.example                    # Database environment configuration template
-└── README.md                       # Comprehensive Project Documentation
+│   └── schema.sql                  # Full MySQL database schema definition
+├── lib/
+│   ├── flatlaf-3.5.2.jar           # FlatLaf dark look-and-feel library
+│   ├── bcrypt-0.10.2.jar           # BCrypt security library
+│   ├── bytes-1.5.0.jar             # Byte array utility for BCrypt
+│   └── mysql-connector-j-26.7.0.jar# MySQL JDBC Database driver
+├── pom.xml                         # Maven build descriptor & dependencies
+├── src/
+│   └── main/java/
+│       ├── gui/                    # Swing GUI Components & Main Dashboard
+│       │   ├── Main.java           # Application Entrypoint
+│       │   ├── MainFrame.java      # Main Dashboard Window
+│       │   ├── LoginRegisterFrame.java # Auth Window
+│       │   ├── WalletPanel.java    # Wallet Metrics & Pie Chart
+│       │   ├── ExpensePanel.java   # Expense Logging & History
+│       │   ├── BudgetPanel.java    # Budget Tracking
+│       │   ├── SavingsPanel.java   # Savings Goals & Contributions
+│       │   ├── NotificationPanel.java # Notifications Center
+│       │   ├── RewardPanel.java    # Points & Achievements
+│       │   ├── ReportPanel.java    # Financial Reports & Side-Pane Viewer
+│       │   ├── Theme.java          # Look and Feel Styling
+│       │   └── UIHelper.java       # Reusable UI Helpers & Dialogs
+│       ├── model/                  # Domain Entities (User, Wallet, Expense, etc.)
+│       │   └── enums/              # Enum Definitions (WalletType, ExpenseCategory, etc.)
+│       ├── observer/               # Event Observers (NotificationObserver, RewardObserver)
+│       ├── repository/             # Concrete Repository Implementations (MySQL queries)
+│       │   └── interfaces/         # Repository Interfaces (IUserRepository, IWalletRepository, etc.)
+│       ├── service/                # Business Logic & JDBC Transaction Management
+│       └── util/                   # Utilities (DBConnection)
+├── .env                            # Local environment configuration (Git ignored)
+├── .env.example                    # Environment template
+├── .gitignore                      # Git ignore rules
+└── README.md                       # Project Documentation
 ```
 
 ---
 
-## 🚀 Running the Project
+## 🚀 Getting Started
 
 ### 1. Prerequisites
-* **Java Development Kit (JDK)**: Java 17 LTS or higher
-* **MySQL Server**: 8.0+ running locally or in Docker
-* **Apache Maven**: 3.8+
+* **Java Development Kit (JDK)**: Java 17 or higher.
+* **MySQL Database**: MySQL Server 8.0+ running locally or remotely.
 
 ### 2. Database Setup
-Run the SQL schema in MySQL to initialize tables and relationships:
+Execute `database/schema.sql` in your MySQL environment (Command Line or MySQL Workbench):
+
 ```bash
 mysql -u root -p < database/schema.sql
 ```
 
 ### 3. Environment Configuration
 Create a `.env` file in the project root directory (or copy from `.env.example`):
+
 ```env
+# Database Credentials
 DB_URL=jdbc:mysql://localhost:3306/finance_manager
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 ```
 
-### 4. Build and Run
-Compile and launch using Maven:
+### 4. Running the Application
+Launch via Maven:
+
 ```bash
 mvn compile exec:java -Dexec.mainClass="gui.Main"
 ```
 
-Or open the project in any Java IDE (VS Code, IntelliJ IDEA, Eclipse) and run `src/main/java/gui/Main.java`.
-
----
-
-## 📌 What This Project Demonstrates
-
-WalletWise is primarily a demonstration of **software design and object-oriented engineering applied to a real-world domain**.
-
-The project brings together:
-
-* **Object-Oriented Programming (OOP)**
-* **Abstraction, Inheritance, Polymorphism & Encapsulation**
-* **Composition (HAS-A Relationships)**
-* **SOLID Design Principles (SRP, OCP, LSP, ISP, DIP)**
-* **Repository Pattern & Data Access Abstraction**
-* **Observer Pattern & Event-Driven Decoupling**
-* **Layered Architecture & Separation of Concerns**
-* **JDBC & MySQL Persistence with Zero Resource Leaks**
-* **Single-Connection Atomic Database Transactions (ACID)**
-* **BCrypt Cryptographic Security & Zero-Downtime Migration**
-* **Presentation Independence (Pluggable Client Architecture)**
+Or open the project in your preferred Java IDE (such as VS Code, IntelliJ IDEA, or Eclipse) and run `src/main/java/gui/Main.java`.
